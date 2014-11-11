@@ -10,11 +10,11 @@ def main():
 	ResponseBot(
 		'KittenBot',
 		'KittenBot (admin contact: Lev)',
+		'irc.foonetic.net', #'irc.gamesurge.net',
+		6667,
 		[
 			'#levtestkitten',
 		],
-		'irc.gamesurge.net',
-		6667,
 		'kittenbot.db',
 		{
 			'sleep': 'die',
