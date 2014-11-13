@@ -29,9 +29,6 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 	
 	def on_welcome(self, connection, event):
 		log('Connected as %s' % connection.get_nickname())
-		for channel in self.database.get_channels(self.server_name):
-			connection.join(channel)
-		
 		connection.execute_every(1, self.random_actions_loop, (connection, ))
 	
 	def random_actions_loop(self, connection):
@@ -71,6 +68,10 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 					'event': event,
 				}
 			)
+	
+	def on_part(self, connection, event):
+		if event.source.nick == connection.get_nickname():
+			log('Leaving %s' % event.target)
 	
 	def on_kick(self, connection, event):
 		if event.arguments[0] == connection.get_nickname():
