@@ -98,7 +98,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 				action = action.replace(alias, '%(me)s')
 			message = self.database.get_random_response(action)
 		
-		if message:
+		if not message:
 			if self.mentions_me(event.arguments[0], connection, event):
 				message = self.database.get_random('random_mentions')
 		
