@@ -22,7 +22,7 @@ def main():
 			'kitty',
 		],
 		{
-			'part': 60 * 60,
+			'part': 180 * 60,
 			'join': 60 * 60,
 			'action': 20 * 60,
 		}

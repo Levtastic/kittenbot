@@ -1,5 +1,0 @@
-blinks at !who.
-stares at !who and twitches an ear.
-mews at !who.
-looks at !who and purrs.
-licks !who.

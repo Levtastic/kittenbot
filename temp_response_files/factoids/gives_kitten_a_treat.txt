@@ -1,1 +1,0 @@
-ignores the treat until !who drops it at which point it pounces
