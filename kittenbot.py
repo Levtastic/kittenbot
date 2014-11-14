@@ -20,7 +20,12 @@ def main():
 		[
 			'kitten',
 			'kitty',
-		]
+		],
+		{
+			'part': 60 * 60,
+			'join': 60 * 60,
+			'action': 20 * 60,
+		}
 	).start()
 
 if __name__ == '__main__':

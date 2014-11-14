@@ -14,13 +14,14 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		'remove',
 	]
 	
-	def __init__(self, nickname, realname, server, port = 6667, db_name = 'responsebot.db', command_aliases = {}, nick_aliases = []):
+	def __init__(self, nickname, realname, server, port = 6667, db_name = 'responsebot.db', command_aliases = {}, nick_aliases = [], random_timings = {}):
 		irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, realname)
 		self.command_aliases = command_aliases
 		self.callback_handler = CallbackHandler()
 		self.database = ResponseDatabase(db_name)
 		self.nick_aliases = nick_aliases
 		self.server_name = server
+		self.random_timings = random_timings
 		log('%s Initialised' % nickname)
 	
 	def on_nicknameinuse(self, connection, event):
@@ -29,27 +30,24 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 	
 	def on_welcome(self, connection, event):
 		log('Connected as %s' % connection.get_nickname())
-		connection.execute_every(1, self.random_actions_loop, (connection, ))
+		if self.random_timings:
+			connection.execute_every(1, self.random_actions_loop, (connection, ))
 	
 	def random_actions_loop(self, connection):
-		part_frequency = 60 * 60
-		join_frequency = 60 * 60
-		action_frequency = 60 * 20
-		
 		for channel in self.channels:
-			if random.randint(1, part_frequency) == 1:
+			if random.randint(1, self.random_timings['part']) == 1:
 				message = self.database.get_random('part_messages')
 				if message:
 					connection.action(channel, self.process_message(message, connection, channel = channel))
 				connection.part(channel)
 			
-			elif random.randint(1, action_frequency) == 1:
+			elif random.randint(1, self.random_timings['action']) == 1:
 				message = self.database.get_random('random_actions')
 				if message:
 					connection.action(channel, self.process_message(message, connection, channel = channel))
 		
 		for channel in self.database.get_channels(self.server_name):
-			if channel not in self.channels and random.randint(1, join_frequency) == 1:
+			if channel not in self.channels and random.randint(1, self.random_timings['join']) == 1:
 				connection.join(channel)
 	
 	def on_invite(self, connection, event):
