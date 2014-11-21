@@ -1,6 +1,5 @@
 class CallbackHandler():
-	def __init__(self):
-		self.callbacks = {}
+	callbacks = {}
 	
 	def add(self, key, function, parameters = {}):
 		self.callbacks[key] = {

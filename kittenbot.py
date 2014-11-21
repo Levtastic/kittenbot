@@ -1,30 +1,34 @@
-"""
-	cache user accounts by nick only for people in visible channels
-	if not in visible channel, can't see nick changes to make sure is same person with access
-	if person leaves all visible channels, remove from cache, look up every time
-"""
+import logging
 
 from responsebot import ResponseBot
 
 def main():
+	logging.basicConfig(
+		filename = 'kittenbot.log',
+		level = logging.INFO,
+		format = '[%(asctime)s] %(message)s',
+		datefmt = '%m/%d/%Y %H:%M:%S'
+	)
 	ResponseBot(
-		'KittenBot',
-		'KittenBot (admin contact: Lev)',
-		#'irc.foonetic.net',
-		'irc.gamesurge.net',
-		6667,
-		'kittenbot.db',
-		{
+		nickname = 'kitten',
+		realname = 'KittenBot (admin contact: Lev)',
+		server = 'irc.gamesurge.net',
+		port = 6667,
+		db_name = 'kittenbot.db',
+		join_commands = [
+			('privmsg', {'target': 'AuthServ@Services.GameSurge.net', 'text': 'auth KittenBot nJPY9jP7'}),
+		],
+		command_aliases = {
 			'sleep': 'die',
 		},
-		[
+		nick_aliases = [
 			'kitten',
 			'kitty',
 		],
-		{
-			'part': 180 * 60,
-			'join': 60 * 60,
-			'action': 20 * 60,
+		random_timings = {
+			'part': 6 * 60 * 60, # every 6 hours
+			'join': 6 * 60 * 60, # every 6 hours
+			'message': 60 * 60, # every 1 hour
 		}
 	).start()
 

@@ -1,3 +1,6 @@
+# only gets imported and run the first time the bot is run on a db file
+# builds the basic db framework, but doesn't populate it
+
 class DbBuilder():
 	def build_database(self, db):
 		self.cursor = db.cursor()
@@ -10,33 +13,10 @@ class DbBuilder():
 		self.build_completed_command_messages()
 		self.build_random_actions()
 		self.build_random_mentions()
+		self.build_trigger_types()
 		self.build_response_types()
 		self.build_response_messages()
 		db.commit()
-	
-	def build_user_types(self):
-		self.cursor.execute("""
-			CREATE TABLE
-				user_types
-			(
-				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				name TEXT NOT NULL,
-				code TEXT NOT NULL,
-				level INTEGER NOT NULL
-			)
-		""")
-		self.cursor.executemany("""
-			INSERT INTO
-				user_types
-				(name, code, level)
-			VALUES
-				(?, ?, ?)
-		""", [
-			('Administrator', 'admin', 100),
-			('User', 'user', 50),
-			('None', 'none', 0),
-			('Blacklisted', 'blacklisted', -50),
-		])
 	
 	def build_users(self):
 		self.cursor.execute("""
@@ -45,25 +25,10 @@ class DbBuilder():
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
 				account_name TEXT NOT NULL,
-				user_type_id INTEGER NOT NULL
+				server_name TEXT NOT NULL,
+				auth_level INTEGER NOT NULL
 			)
 		""")
-		self.cursor.execute("""
-			INSERT INTO
-				users
-				(account_name, user_type_id)
-			SELECT
-				?, 
-				id
-			FROM
-				user_types
-			WHERE
-				code = ?
-			LIMIT
-				1
-		""",
-			('Lev', 'admin')
-		)
 	
 	def build_channels(self):
 		self.cursor.execute("""
@@ -84,18 +49,10 @@ class DbBuilder():
 				join_messages
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
-		self.cursor.execute("""
-			INSERT INTO
-				join_messages
-				(message_text)
-			VALUES
-				(?)
-		""",
-			('enters the room', )
-		)
 	
 	def build_part_messages(self):
 		self.cursor.execute("""
@@ -103,18 +60,10 @@ class DbBuilder():
 				part_messages
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
-		self.cursor.execute("""
-			INSERT INTO
-				part_messages
-				(message_text)
-			VALUES
-				(?)
-		""",
-			('leaves the room', )
-		)
 	
 	def build_unknown_command_messages(self):
 		self.cursor.execute("""
@@ -122,18 +71,10 @@ class DbBuilder():
 				unknown_command_messages
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
-		self.cursor.execute("""
-			INSERT INTO
-				unknown_command_messages
-				(message_text)
-			VALUES
-				(?)
-		""",
-			('ignores %(speaker)s', )
-		)
 	
 	def build_completed_command_messages(self):
 		self.cursor.execute("""
@@ -141,26 +82,19 @@ class DbBuilder():
 				completed_command_messages
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
-		self.cursor.execute("""
-			INSERT INTO
-				completed_command_messages
-				(message_text)
-			VALUES
-				(?)
-		""",
-			('acknowledges %(speaker)s', )
-		)
 	
 	def build_random_actions(self):
 		self.cursor.execute("""
 			CREATE TABLE
-				random_actions
+				random_messages
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
 	
@@ -170,9 +104,32 @@ class DbBuilder():
 				random_mentions
 			(
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-				message_text TEXT NOT NULL
+				message_text TEXT NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
+	
+	def build_trigger_types(self):
+		self.cursor.execute("""
+			CREATE TABLE
+				trigger_types
+			(
+				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+				name TEXT NOT NULL,
+				code TEXT NOT NULL
+			)
+		""")
+		self.cursor.executemany("""
+			INSERT INTO
+				trigger_types
+				(name, code)
+			VALUES
+				(?, ?)
+		""", [
+			('Action', 'action'),
+			('Message', 'message'),
+			('Both', 'both'),
+		])
 	
 	def build_response_types(self):
 		self.cursor.execute("""
@@ -193,7 +150,6 @@ class DbBuilder():
 		""", [
 			('Action', 'action'),
 			('Message', 'message'),
-			('Both', 'both'),
 		])
 	
 	def build_response_messages(self):
@@ -204,7 +160,7 @@ class DbBuilder():
 				id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
 				trigger TEXT NOT NULL,
 				message_text TEXT NOT NULL,
-				response_type_id INTEGER NOT NULL,
-				action_code TEXT NOT NULL DEFAULT ""
+				trigger_type_id INTEGER NOT NULL,
+				response_type_id INTEGER NOT NULL
 			)
 		""")
