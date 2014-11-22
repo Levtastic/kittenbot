@@ -1,10 +1,10 @@
 @echo off
-title KittenBot
+title Foonetic KittenBot
 
 echo Starting bot...
 
 :start
-python kittenbot.py
+python kittenbot_foonetic.py
 echo Bot stopped.
 
 echo.

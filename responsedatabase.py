@@ -39,8 +39,11 @@ class ResponseDatabase():
 		""",
 			(account_name, server_name)
 		)
-		result, = cursor.fetchone()
-		return result
+		result = cursor.fetchone()
+		if result:
+			return result[0]
+		else:
+			return 0
 	
 	def get_channels(self, server_name, include_blacklisted = False):
 		cursor = self.database.cursor()
@@ -184,7 +187,10 @@ class ResponseDatabase():
 		elif command == 'list':
 			return self.list_records(connection, server_name, reply_target, table, parameters)
 		
-		elif command == 'add' and auth_level >= 50:
+		elif command == 'add':
+			if table == 'channels' and auth_level < 50:
+				return False
+			
 			return self.add_record(server_name, table, auth_level, parameters, nicknames)
 		
 		else:
@@ -519,7 +525,7 @@ class ResponseDatabase():
 		try:
 			cursor.execute(command)
 		except BaseException as e:
-			logging.error('%s %s, query: %s' % (type(e), e, query))
+			logging.error('%s %s, query: %s' % (type(e), e, command))
 			return False
 		
 		if cursor.description:

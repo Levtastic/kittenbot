@@ -115,7 +115,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 				connection.join(channel)
 	
 	def on_privnotice(self, connection, event):
-		if event.source and event.source.nick != 'Global':
+		if event.source:
 			logging.info('Private notice from %s: "%s"' % (event.source.nick, event.arguments[0]))
 	
 	def on_invite(self, connection, event):
@@ -251,6 +251,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 						'event': event,
 						'full_command': full_command,
 						'reply_target': reply_target,
+						'auth_level': 0,
 					}
 				)
 				connection.whois(event.source.nick)
@@ -383,14 +384,12 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		
 		self.send(connection, reply_target, self.database.get_random('unknown_command_messages'), event)
 	
-	def on_whoisuser(self, connection, event):
-		# check we can see an account name - if not, we give them an auth level of 0
-		if len(event.arguments) < 4:
-			auth_level = 0
-		else:
-			auth_level = self.database.get_whois_auth_level(event.arguments[4], self.server_name)
-		
-		self.callback_handler.run('whois-%s' % event.arguments[0], {'auth_level': auth_level})
+	def on_whoisaccount(self, connection, event):
+		callback = self.callback_handler.callbacks['whois-%s' % event.arguments[0]]
+		callback['parameters']['auth_level'] = self.database.get_whois_auth_level(event.arguments[1], self.server_name)
+	
+	def on_endofwhois(self, connection, event):
+		self.callback_handler.run('whois-%s' % event.arguments[0])
 	
 	def process_message(self, message, connection, event = None, channel = None):
 		me = connection.get_nickname()
@@ -418,6 +417,9 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		# - incorrect, but not fatal
 		if not someone:
 			someone = speaker
+		
+		# TODO: add !target which can be taken from trigger text (have to use regex to find the target? something like that - also replace target with "%" in SQL to match whatever is there
+		# add trigger action throws !me at !target = action clings to !target's face
 		
 		message = self.replace_patterns['speaker'].sub(speaker, message)
 		message = self.replace_patterns['channel'].sub(channel, message)
