@@ -1,7 +1,6 @@
 import logging
 import irc.bot
 
-from callbackhandler import CallbackHandler
 from modulehandler import ModuleHandler
 
 class ResponseBot(irc.bot.SingleServerIRCBot):
@@ -19,7 +18,6 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		
 		# set up helper classes for later use
 		self.module_handler = ModuleHandler(self)
-		self.callback_handler = CallbackHandler()
 		
 		# hook into IRC event handler to pass events to our event handler
 		self.manifold.add_global_handler("all_events", self.irc_events)

@@ -23,12 +23,12 @@ class MessageCommands():
 		
 		if command == 'send': # ResponseBot: send message #responsebot -Hello world!
 			try:
-				channel, message_text = parameters.strip().split(' ', 2)
+				channel, message_text = parameters.strip().split(' ', 1)
 			except ValueError:
 				pass
 			else:
 				if channel[0] != '#' or channel.lower() in bot.channels:
-					bot.send(connection, channel.lower(), message_text, event)
+					bot.send(connection, channel, message_text, event)
 					bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 					return True
 		

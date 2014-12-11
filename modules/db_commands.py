@@ -36,6 +36,13 @@ class DbCommands():
 			if key is False or value is False:
 				return False
 			
+			if 'user|%s|' % bot.server_name in key:
+				if not value.isdigit():
+					return False
+				
+				if not int(value) < auth_level:
+					return False
+			
 			if bot.db.add(key, value):
 				bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 				return True
@@ -57,7 +64,7 @@ class DbCommands():
 				bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 				return True
 		
-		elif command == 'list': # ResponseBot: list 2 *pokes ResponseBot = *bites%
+		elif command == 'list': # ResponseBot: list 2 *pokes = *bites
 			results_per_page = 5
 			page = 1
 			
@@ -93,9 +100,16 @@ class DbCommands():
 			except ValueError:
 				return False
 			
-			values = [s.strip() for s in value.split(',')]
+			values = [s.strip() for s in value.split(',') if s.strip()]
 			if not values:
 				return False
+			
+			if 'user|%s|' % bot.server_name in key:
+				if not all(value.isdigit() for value in values):
+					return False
+				
+				if not all(int(value) < auth_level for value in values):
+					return False
 			
 			if bot.db.set(key, values):
 				bot.send(connection, reply_target, bot.db.get_random('yes'), event)

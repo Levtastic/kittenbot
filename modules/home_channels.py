@@ -3,7 +3,9 @@ def init():
 
 class HomeChannels():
 	def __init__(self):
-		event_handler.hook('irc:on_welcome', self.on_welcome)
+		 # join homes AFTER we're done setting up the bot (eg auth commands etc)
+		event_handler.hook('irc:on_welcome', self.on_welcome, 750)
+		
 		event_handler.hook('irc:on_part', self.on_leave)
 		event_handler.hook('irc:on_kick', self.on_leave)
 	
