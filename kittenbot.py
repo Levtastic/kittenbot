@@ -17,7 +17,7 @@ def main():
 		port = 6667
 	
 	logging.basicConfig(
-		filename = 'logs/%s.log' % datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S'),
+		filename = 'logs/%s %s.log' % (sys.argv[2], datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')),
 		level = logging.INFO,
 		format = '[%(asctime)s] %(message)s\n',
 		datefmt = '%m/%d/%Y %H:%M:%S'
@@ -29,7 +29,7 @@ def main():
 		server = server,
 		port = port,
 		module_parameters = {
-			'db_name': 'kittenbot.db',
+			'database:name': 'kittenbot.db',
 		}
 	).start()
 

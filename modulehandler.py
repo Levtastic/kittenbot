@@ -20,6 +20,8 @@ class ModuleHandler():
 		if any(result is False for result in self.fire_event('modulehandler:before_load_modules', (self, self.bot, self.event_handler, first_time))):
 			return False
 		
+		logging.info('Loading modules')
+		
 		# try to import all modules - if failed, return before we break our previous event handlers
 		for module in module_names:
 			if module in sys.modules:
@@ -37,7 +39,7 @@ class ModuleHandler():
 				if first_time:
 					raise
 				# if we fail out here, old event hooks remain in place
-				error = 'module "%s" unable to import: %s %s' % (str(module), type(e), e)
+				error = 'module "%s" unable to import: %s: %s' % (str(module), type(e).__name__, e)
 				logging.exception(error)
 				print(error)
 				return False
@@ -56,7 +58,7 @@ class ModuleHandler():
 				if first_time:
 					raise
 				# if we fail out here, this module will NOT have hooked its events
-				error = 'module "%s" unable to init: %s %s' % (str(module), type(e), e)
+				error = 'module "%s" unable to init: %s: %s' % (str(module), type(e).__name__, e)
 				logging.exception(error)
 				print(error)
 		
@@ -70,4 +72,7 @@ class ModuleHandler():
 		return self.event_handler.fire(key, parameters)
 	
 	def hook_event(self, key, function, priority = 500):
-		self.event_handler.hook(key, function, priority, permanent)
+		return self.event_handler.hook(key, function, priority, permanent)
+	
+	def get_event_handlers(self, key):
+		return self.event_handler.get_handlers(key)

@@ -4,14 +4,15 @@ import sqlite3
 from contextlib import closing
 
 def init():
-	bot.db = Database(bot.module_parameters['db_name'])
+	bot.db = Database(bot.module_parameters['database:name'])
 
 class Database():
-	last_random_ids = {}
-	
 	def __init__(self, db_name):
+		self.last_random_ids = {}
+		
 		self.database = sqlite3.connect(db_name)
 		self.database.create_function('message_match', 4, self.message_match)
+		self.database.create_function('key_start', 1, self.key_start)
 		if not self.database_exists():
 			self.build_database()
 	
@@ -49,7 +50,7 @@ class Database():
 			
 			return False
 		except BaseException as e:
-			error = 'Exception in message_match sql function: %s %s' % (type(e), e)
+			error = 'Exception in message_match sql function: %s: %s' % (type(e).__name__, e)
 			print(error)
 			logging.exception(error)
 			return False
@@ -71,6 +72,14 @@ class Database():
 				current[j] = min(add, delete, change)
 		
 		return 1 - current[n] / m
+	
+	def key_start(self, key):
+		split = '|'
+		
+		if split not in key:
+			return key
+		
+		return key[:key.index(split)]
 	
 	def database_exists(self):
 		with closing(self.database.cursor()) as cursor:
@@ -135,6 +144,35 @@ class Database():
 		else:
 			return default_value
 	
+	def get_key_value(self, key_filter, value_filter = '', default_value = ()):
+		if not value_filter:
+			value_filter = '%'
+		
+		with closing(self.database.cursor()) as cursor:
+			cursor.execute("""
+				SELECT
+					key,
+					value
+				FROM
+					vars
+				WHERE
+						key LIKE ?
+					AND
+						value LIKE ?
+				ORDER BY
+					id ASC
+				LIMIT
+					1
+			""",
+				(key_filter, value_filter)
+			)
+			result = cursor.fetchone()
+		
+		if result:
+			return (result[0], result[1])
+		else:
+			return default_value
+	
 	def get_random(self, key_filter, default_value = ''):
 		if key_filter.lower() in self.last_random_ids:
 			last_id = self.last_random_ids[key_filter.lower()]
@@ -183,13 +221,7 @@ class Database():
 				FROM
 					vars
 				WHERE
-						(
-								SUBSTR(key, 1, 1) = '~'
-							OR
-								SUBSTR(key, 1, 2) LIKE '%-%'
-							OR
-								SUBSTR(key, 1, 3) LIKE '%*%'
-						)
+						SUBSTR(key, 1, 1) IN ('~', '-', '*')
 					AND
 						message_match(key, ?, ?, ?)
 				ORDER BY
@@ -293,6 +325,22 @@ class Database():
 		else:
 			return default_value
 	
+	def list_keys(self, messages_only = True):
+		with closing(self.database.cursor()) as cursor:
+			cursor.execute("""
+				SELECT DISTINCT
+					key_start(key)
+				FROM
+					vars
+				WHERE
+					SUBSTR(key, 1, 1) NOT IN ('~', '-', '*')
+				ORDER BY
+					1
+			""")
+			result = [row[0] for row in cursor]
+		
+		return result
+	
 	def check_exists(self, key_filter, value_filter = ''):
 		if not value_filter:
 			value_filter = '%'
@@ -373,14 +421,14 @@ class Database():
 		try:
 			cursor.execute(command)
 		except BaseException as e:
-			connection.privmsg(reply_target, str(e))
+			bot.send(connection, reply_target, '-' + str(e), None, False)
 			return False
 		
 		if cursor.description:
-			connection.privmsg(reply_target, ' | '.join(c[0] for c in cursor.description))
+			bot.send(connection, reply_target, ' | '.join(c[0] for c in cursor.description), None, False)
 		
 		for row in cursor:
-			connection.privmsg(reply_target, ' | '.join(str(r) for r in row))
+			bot.send(connection, reply_target, ' | '.join(str(r) for r in row), None, False)
 		
 		self.database.commit()
 		return True

@@ -25,6 +25,6 @@ def on_welcome(bot, connection, event):
 			function(*parameters)
 		
 		except BaseException as e:
-			error = 'join_command "%s" unable to execute: %s %s' % (command, str(type(e)), str(e))
+			error = 'join_command "%s" unable to execute: %s: %s' % (command, type(e).__name__, str(e))
 			print(error)
 			logging.error(error)

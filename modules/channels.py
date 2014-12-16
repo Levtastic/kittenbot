@@ -38,7 +38,7 @@ class Channels():
 	def on_needinvite(self, bot, connection, event):
 		channel = event.arguments[0]
 		if channel and channel[0] == '#':
-			connection.privmsg('ChanServ', 'inviteme %s' % channel)
+			bot.send(connection, 'ChanServ', '-inviteme %s' % channel, event)
 
 	def on_kick(self, bot, connection, event):
 		if event.arguments[0] == connection.get_nickname():

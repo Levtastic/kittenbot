@@ -6,6 +6,10 @@ def init():
 class RandomActions():
 	run = True
 	talked_last = []
+	auth_commands = {
+		'runloop': 70,
+		'stoploop': 70,
+	}
 	
 	def __init__(self):
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
@@ -16,11 +20,17 @@ class RandomActions():
 		event_handler.hook('irc:on_pubmsg', self.on_message)
 		event_handler.hook('irc:on_action', self.on_message)
 		event_handler.hook('bot:on_after_send_message', self.on_after_send_message)
+		
+		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
+		event_handler.hook('commands:do_auth_command', self.do_auth_command)
 	
 	def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
-		self.run = False # we're about to be replaced!
+		# we're about to be replaced!
+		bot.module_parameters['random_actions:talked_last'] = self.talked_last
+		self.run = False 
 	
 	def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
+		self.talked_last = bot.module_parameters.pop('random_actions:talked_last', [])
 		self.random_messages_loop(bot) # we run now, because we know bot.db will exist
 	
 	def random_messages_loop(self, bot):
@@ -30,15 +40,11 @@ class RandomActions():
 		repeat_timer = 1
 		
 		try:
-			part_timing = bot.db.get('part_timing')
-			join_timing = bot.db.get('join_timing')
-			message_timing = bot.db.get('message_timing')
+			part_timing = int(bot.db.get('part_timing', default_value = 0))
+			join_timing = int(bot.db.get('join_timing', default_value = 0))
+			message_timing = int(bot.db.get('message_timing', default_value = 0))
 			
 			if bot.connection.is_connected() and (part_timing or join_timing or message_timing):
-				part_timing = part_timing and int(part_timing)
-				message_timing = message_timing and int(message_timing)
-				join_timing = join_timing and int(join_timing)
-				
 				db_channels = bot.db.get_all('channel|' + bot.server_name)
 				
 				for channel in bot.channels:
@@ -60,10 +66,10 @@ class RandomActions():
 				repeat_timer = 60 # try again later
 		
 		except BaseException as e:
-			error = 'random messages loop hit an exception: %s %s' % (key, type(e), e)
+			error = 'random messages loop hit an exception: %s: %s' % (key, type(e).__name__, e)
 			logging.exception(error)
 			print(error)
-			return # don't keep repeating the mistake
+			self.run = False # don't keep repeating the mistake
 		
 		bot.connection.execute_delayed(repeat_timer, self.random_messages_loop, (bot, ))
 	
@@ -80,3 +86,27 @@ class RandomActions():
 		# we just talked in this channel - we don't want to be the next to talk (responsebots are shy) so we record this for later
 		if target[0] == '#':
 			self.talked_last.append(target)
+	
+	def get_auth_commands(self, bot):
+		return self.auth_commands
+
+	def do_auth_command(self, bot, connection, event, command, parameters, reply_target, auth_level):
+		if command not in self.auth_commands:
+			return False # not for us
+		
+		if command == 'runloop':
+			if self.run:
+				return False
+			
+			self.run = True
+			self.random_messages_loop(bot)
+			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
+			return True
+		
+		elif command == 'stoploop':
+			if not self.run:
+				return False
+			
+			self.run = False
+			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
+			return True

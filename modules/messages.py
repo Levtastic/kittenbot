@@ -1,12 +1,10 @@
-import re
-
 def init():
 	event_handler.hook('irc:on_privmsg', on_message)
 	event_handler.hook('irc:on_pubmsg', on_message)
 	event_handler.hook('irc:on_action', on_message)
 	event_handler.hook('commands:on_message', on_message)
 	
-	event_handler.hook('bot:send_message', send_message)
+	event_handler.hook('bot:on_send_message', on_send_message)
 
 def on_message(bot, connection, event, auth_level = None):
 	if event.type == 'privmsg':
@@ -21,50 +19,21 @@ def on_message(bot, connection, event, auth_level = None):
 	else:
 		return
 	
-	if any(result is False for result in event_handler.fire('messages:on_before_handle_message', (bot, connection, event, is_action, is_public, auth_level))):
-		return
-	
 	reply_target = is_public and event.target or event.source.nick
 	
-	# check if it's a command
-	if not is_action:
-		command = None
-		
-		if not is_public:
-			command = event.arguments[0].strip()
-		else:
-			message_split = event.arguments[0].split(':', 1)
-			if len(message_split) == 2 and message_split[0].lower().strip() == bot.connection.get_nickname().lower():
-				command = message_split[1]
-		
-		# if sent in private message or prefixed by our name, try it as a command
-		if command:
-			if any(event_handler.fire('messages:do_command', (bot, connection, event, command, reply_target, auth_level))):
+	for handler in event_handler.get_handlers('messages:on_handle_messages'):
+		try:
+			if handler(bot, connection, event, is_public, is_action, reply_target, auth_level) is True:
 				return
-	
-	# not a failed or successful command, so test it against our response database
-	message = get_message(connection, event, is_action)
-	if message:
-		bot.send(connection, reply_target, message, event)
-		return
-	
-	# still no hit? Nothing to do with us, move along.
-
-def get_message(connection, event, is_action):
-	message_type_code = is_action and '*' or '-'
-	
-	# Try to get a message as-is, then try swapping in aliases
-	for name in [False, connection.get_nickname()] + bot.db.get_all('nick_alias'):
-		if name:
-			message = re.sub(re.escape(name), '!me', event.arguments[0], flags = re.IGNORECASE)
-		else:
-			message = event.arguments[0]
 		
-		message = bot.db.get_reply(message, message_type_code)
-		if message:
-			return message
+		except BaseException as e:
+			error = 'error in message handling function: %s: %s' % (type(e).__name__, e)
+			logging.exception(error)
+			print(error)
+	
+	# if we get here, no handler wanted the message, so we're done - bot does nothing
 
-def send_message(bot, connection, target, message, event):
+def on_send_message(bot, connection, target, message, event):
 	message_type_matches = []
 	
 	for c in message:
@@ -89,7 +58,7 @@ def send_message(bot, connection, target, message, event):
 	if original_message_type_code in message_type_matches:
 		send_func = original_message_type_code == '-' and connection.privmsg or connection.action
 	else:
-		send_func = message_type_matches[0] == '-' and connection.privms or connection.action
+		send_func = message_type_matches[0] == '-' and connection.privmsg or connection.action
 	
 	send_func(target, message)
 	

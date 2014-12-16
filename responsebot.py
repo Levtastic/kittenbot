@@ -8,10 +8,6 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		# init bot framework
 		irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, realname)
 		
-		# max of 2 messages a second, to avoid flooding out
-		# note: may cause blocking which could make the bot fail to respond to a ping
-		self.connection.set_rate_limit(2)
-		
 		# store passed variables for later use
 		self.server_name = server_name
 		self.module_parameters = module_parameters
@@ -19,36 +15,50 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		# set up helper classes for later use
 		self.module_handler = ModuleHandler(self)
 		
+		# max messages a second, to avoid flooding out
+		# note: may cause blocking which could make the bot fail to respond to a ping
+		rate_limit = int(self.db.get('connection_rate_limit', default_value = 0))
+		if rate_limit:
+			self.connection.set_rate_limit(rate_limit)
+		
 		# hook into IRC event handler to pass events to our event handler
-		self.manifold.add_global_handler("all_events", self.irc_events)
+		self.manifold.add_global_handler("all_events", self._irc_events)
 		
 		# init event
 		self.module_handler.fire_event('bot:finish_init', self)
 	
-	def irc_events(self, connection, event):
+	def _irc_events(self, connection, event):
 		self.module_handler.fire_event('irc:on_' + event.type, (self, connection, event))
 	
 	def start(self):
 		self.module_handler.fire_event('bot:on_start', self)
 		super(ResponseBot, self).start()
 	
-	def send(self, connection, target, message, event = None):
+	def send(self, connection, target, message, event = None, process_message = True):
 		if any(result is False for result in self.module_handler.fire_event('bot:on_before_send_message', (self, connection, target, message, event))):
 			return False
 		
-		message = self.process_message(message, connection, event, target)
+		if process_message:
+			for process_function in self.module_handler.get_event_handlers('bot:on_process_message'):
+				try:
+					message = process_function(self, message, connection, event, target)
+				except BaseException as e:
+					error = 'error in message processing function: %s: %s' % (type(e).__name__, e)
+					logging.exception(error)
+					print(error)
 		
 		if not message or not isinstance(message, str):
 			return False
 		
 		sent_by_module = True
-		if not any(result is True for result in self.module_handler.fire_event('bot:send_message', (self, connection, target, message, event))):
+		if not any(result is True for result in self.module_handler.fire_event('bot:on_send_message', (self, connection, target, message, event))):
 			try:
-				connection.privmsg(target, message) # default behaviour, if nothing has overridden it
+				# default behaviour, if nothing has overridden it
+				connection.privmsg(target, message)
 				sent_by_module = False
 			except BaseException as e:
-				error = 'unable to send "%s" to %s: %s %s' % (message, target, str(type(e)), e)
-				logging.error(error)
+				error = 'unable to send "%s" to %s: %s: %s' % (message, target, type(e).__name__, e)
+				logging.exception(error)
 				print(error)
 				return False
 		
@@ -56,22 +66,16 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		
 		return True
 	
-	def process_message(self, message, connection, event = None, channel = None):
-		results = self.module_handler.fire_event('bot:on_get_message_processor', (self, message, connection, event, channel))
-		
-		for process_function in [function for function in results if callable(function)]:
+	def quit(self, connection, event, message = ''):
+		for process_function in self.module_handler.get_event_handlers('bot:on_quit'):
 			try:
-				message = process_function(self, message, connection, event, channel)
+				if process_function(self, connection, event, message) is False:
+					return False
 			except BaseException as e:
-				error = 'error in message processing function: %s %s' % (str(type(e)), e)
+				error = 'error in message processing function: %s: %s' % (type(e).__name__, e)
 				logging.exception(error)
 				print(error)
 		
-		return message
-	
-	def quit(self, connection, event, message = ''):
-		if any(result is False for result in self.module_handler.fire_event('bot:on_quit', (self, connection, event, message))):
-			return False
-		
+		# die later, after any final issues have been handled
 		connection.execute_delayed(1, self.die, (message, ))
 		return True

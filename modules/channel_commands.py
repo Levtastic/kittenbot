@@ -15,7 +15,7 @@ class ChannelCommands():
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
 
-	def get_auth_commands(self, bot, connection, event, command, parameters, reply_target, auth_level):
+	def get_auth_commands(self, bot):
 		return self.auth_commands
 
 	def do_auth_command(self, bot, connection, event, command, parameters, reply_target, auth_level):

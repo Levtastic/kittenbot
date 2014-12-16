@@ -2,11 +2,14 @@ import random
 import re
 
 def init():
-	MessageProcessor()
+	ResponseHandler()
 
-class MessageProcessor():
+class ResponseHandler():
 	def __init__(self):
-		event_handler.hook('bot:on_get_message_processor', self.on_get_message_processor)
+		# responses get checked last - only do this if no other module had a use for the message
+		event_handler.hook('messages:on_handle_messages', self.on_handle_message, 1000)
+		
+		event_handler.hook('bot:on_process_message', self.on_process_message)
 		
 		# create regex patterns for case insensitive replacing
 		self.speaker_pattern	= re.compile(re.escape('!speaker'),	re.IGNORECASE)
@@ -15,10 +18,24 @@ class MessageProcessor():
 		self.me_pattern			= re.compile(re.escape('!me'),		re.IGNORECASE)
 		self.server_pattern		= re.compile(re.escape('!server'),	re.IGNORECASE)
 	
-	def on_get_message_processor(self, bot, message, connection, event, channel):
-		return self.process_message
+	def on_handle_message(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
+		message_type_code = is_action and '*' or '-'
+		
+		# Try to get a message as-is, then try swapping in aliases
+		for name in [False, connection.get_nickname()] + bot.db.get_all('nick_alias'):
+			if name:
+				message = re.sub(re.escape(name), '!me', event.arguments[0], flags = re.IGNORECASE)
+			else:
+				message = event.arguments[0]
+			
+			message = bot.db.get_reply(message, message_type_code)
+			if message:
+				bot.send(connection, reply_target, message, event)
+				return True
+		
+		return False
 	
-	def process_message(self, bot, message, connection, event, channel):
+	def on_process_message(self, bot, message, connection, event, channel):
 		me = connection.get_nickname()
 		someone = ''
 		

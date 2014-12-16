@@ -1,23 +1,25 @@
 import logging
 
 def init():
-	event_handler.hook('bot:finish_init', on_init_finished, 250)
-	event_handler.hook('bot:on_start', on_bot_start, 250)
-	event_handler.hook('irc:on_welcome', on_welcome, 250)
-	event_handler.hook('irc:on_privnotice', on_privnotice, 250)
-	event_handler.hook('irc:on_invite', on_invite, 250)
-	event_handler.hook('irc:on_join', on_join, 250)
-	event_handler.hook('irc:on_part', on_part, 250)
-	event_handler.hook('irc:on_kick', on_kick, 250)
-	event_handler.hook('irc:on_nick', on_nick, 250)
-	event_handler.hook('irc:on_nicknameinuse', on_nicknameunavailable, 250)
-	event_handler.hook('irc:on_nickcollision', on_nicknameunavailable, 250)
-	event_handler.hook('irc:on_unavailresource', on_nicknameunavailable, 250)
-	event_handler.hook('irc:on_channelisfull', on_cant_join, 250)
-	event_handler.hook('irc:on_inviteonlychan', on_cant_join, 250)
-	event_handler.hook('irc:on_badchannelkey', on_cant_join, 250)
-	event_handler.hook('irc:on_bannedfromchan', on_cant_join, 250)
-	event_handler.hook('bot:on_quit', on_quit, 250)
+	event_handler.hook('bot:finish_init', on_init_finished, 0)
+	event_handler.hook('bot:on_start', on_bot_start, 0)
+	event_handler.hook('irc:on_welcome', on_welcome, 0)
+	event_handler.hook('irc:on_privnotice', on_privnotice, 0)
+	event_handler.hook('irc:on_invite', on_invite, 0)
+	event_handler.hook('irc:on_join', on_join, 0)
+	event_handler.hook('irc:on_part', on_part, 0)
+	event_handler.hook('irc:on_kick', on_kick, 0)
+	event_handler.hook('irc:on_nick', on_nick, 0)
+	event_handler.hook('irc:on_nicknameinuse', on_nicknameunavailable, 0)
+	event_handler.hook('irc:on_nickcollision', on_nicknameunavailable, 0)
+	event_handler.hook('irc:on_unavailresource', on_nicknameunavailable, 0)
+	event_handler.hook('irc:on_channelisfull', on_cant_join, 0)
+	event_handler.hook('irc:on_inviteonlychan', on_cant_join, 0)
+	event_handler.hook('irc:on_badchannelkey', on_cant_join, 0)
+	event_handler.hook('irc:on_bannedfromchan', on_cant_join, 0)
+	
+	# last, so only fires if no other handler stops the shutdown
+	event_handler.hook('bot:on_quit', on_quit, 1000)
 
 def on_init_finished(bot):
 	logging.info('Initialised')
