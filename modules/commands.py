@@ -46,7 +46,7 @@ class Commands():
 		
 		command = command.strip().lower()
 		
-		command_aliases = self.get_command_aliases()
+		command_aliases = bot.helpers.get_command_aliases(bot)
 		if command in command_aliases:
 			command = command_aliases[command]
 		
@@ -115,16 +115,3 @@ class Commands():
 	def repeat_message_event(self, bot, connection, event, auth_level):
 		# start over from scratch, so we can still continue to try to find a trigger match if auth is too low
 		event_handler.fire('commands:on_message', (bot, connection, event, auth_level))
-	
-	def get_command_aliases(self):
-		aliases = {}
-		
-		for alias in bot.db.get_all('command_alias'):
-			try:
-				key, value = alias.split('=', 1)
-			except ValueError:
-				continue
-			else:
-				aliases[key.strip().lower()] = value.strip().lower()
-		
-		return aliases

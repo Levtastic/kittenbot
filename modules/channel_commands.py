@@ -10,10 +10,36 @@ class ChannelCommands():
 		'blacklist': 60,
 		'unblacklist': 60,
 	}
+	command_descriptions = {
+		'join': """
+			Joins the given channel
+			Syntax: join [#channel]
+		""",
+		'part': """
+			Leaves the given channel
+			Syntax: part [#channel] [part message]
+		""",
+		'blacklist': """
+			Blacklists a channel
+			Blacklisted channels will not be automatically joined by the bot's random event loop
+			Syntax: blacklist [#channel] [reason]
+		""",
+		'unblacklist': """
+			Unblacklists a blacklisted channel
+			Blacklisted channels will not be automatically joined by the bot's random event loop
+			Syntax: unblacklist [#channel]
+		""",
+	}
 	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 
 	def get_auth_commands(self, bot):
 		return self.auth_commands

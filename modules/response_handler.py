@@ -5,7 +5,39 @@ def init():
 	ResponseHandler()
 
 class ResponseHandler():
+	command_descriptions = {
+		'codes': """
+			Available codes: !server, !channel, !me, !speaker, !someone
+			Use "help [!code]" for more information on a specific code
+		""",
+		'!server': """
+			Replaced with the current server's name
+			Example: -Where are we? = -We are in !channel, on !server
+		""",
+		'!channel': """
+			Replaced with the channel the message is being sent to
+			Example: -Where are we? = -We are in !channel
+		""",
+		'!me': """
+			Replaced with the bot's current nickname
+			Note: in triggers, this also matches any of the bot's aliases
+			Example: -Hello !me = -Yes, I am !me, thank you for noticing
+		""",
+		'!speaker': """
+			Replaced with whoever said the message that triggered a response.
+			If the response wasn't triggered by a person, gets filled with a random person's name
+			Example: -Hi bot = -Hello !speaker
+		""",
+		'!someone': """
+			Replaced with a random nickname from the channel
+			Note: Is never the bot's own name, and is only the same as !speaker if there is no one else in the channel for it to pick
+			Example: -Who is cool? = -!someone is cool!
+		""",
+	}
+	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		# responses get checked last - only do this if no other module had a use for the message
 		event_handler.hook('messages:on_handle_messages', self.on_handle_message, 1000)
 		
@@ -17,6 +49,10 @@ class ResponseHandler():
 		self.someone_pattern	= re.compile(re.escape('!someone'),	re.IGNORECASE)
 		self.me_pattern			= re.compile(re.escape('!me'),		re.IGNORECASE)
 		self.server_pattern		= re.compile(re.escape('!server'),	re.IGNORECASE)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 	
 	def on_handle_message(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
 		message_type_code = is_action and '*' or '-'

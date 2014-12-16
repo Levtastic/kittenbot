@@ -21,6 +21,9 @@ def on_message(bot, connection, event, auth_level = None):
 	
 	reply_target = is_public and event.target or event.source.nick
 	
+	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, is_public, is_action, reply_target, auth_level))):
+		return False
+	
 	for handler in event_handler.get_handlers('messages:on_handle_messages'):
 		try:
 			if handler(bot, connection, event, is_public, is_action, reply_target, auth_level) is True:

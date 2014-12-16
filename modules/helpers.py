@@ -22,3 +22,16 @@ class Helpers():
 				auth_commands.update(result)
 		
 		return auth_commands
+	
+	def get_command_aliases(self, bot):
+		aliases = {}
+		
+		for alias in bot.db.get_all('command_alias'):
+			try:
+				key, value = alias.split('=', 1)
+			except ValueError:
+				continue
+			else:
+				aliases[key.strip().lower()] = value.strip().lower()
+		
+		return aliases

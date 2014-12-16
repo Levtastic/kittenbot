@@ -9,10 +9,32 @@ class MessageCommands():
 		'say': 60,
 		'do': 60,
 	}
+	command_descriptions = {
+		'send': """
+			Sends a message to the given channel
+			Use - to send a text message, and * to send an action
+			Example: send -Hi!
+			Syntax: send [#channel] [message]
+		""",
+		'say': """
+			Sends a text message to the given channel
+			Syntax: say [#channel] [message]
+		""",
+		'do': """
+			Sends an action message to the given channel
+			Syntax: do [#channel] [action]
+		""",
+	}
 	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 
 	def get_auth_commands(self, bot):
 		return self.auth_commands

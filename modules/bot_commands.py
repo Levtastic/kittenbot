@@ -5,21 +5,42 @@ def init():
 
 class BotCommands():
 	auth_commands = {
-		'commands': 0,
 		'nick': 60,
 		'die': 80,
 		'reload': 80,
 		'exec': 90,
 	}
+	command_descriptions = {
+		'nick': """
+			Sets the bot to a new nickname
+			If no nickname is given, tells the bot to return to its most ideal nickname
+			Syntax: nick [nickname]
+		""",
+		'die': """
+			Shuts down the bot.
+			Note: The bot will not automatically restart after this command is given.
+			Syntax: die [quit message]
+		""",
+		'reload': """
+			Recompiles bot source files from disk and reloads module event hooks
+			If unsuccessful, reverts changes
+			Syntax: reload
+		""",
+		'exec': """
+			Runs arbitrary python code. Obviously, be careful with this.
+			Syntax: exec -force [executable python code]
+		""",
+	}
 	
 	def __init__(self):
-		event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)
+		event_handler.hook('help:get_command_description', self.get_command_description)
 		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
 	
-	def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
-		self.auth_commands['commands'] = min(bot.helpers.get_auth_commands(bot).values())
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 	
 	def get_auth_commands(self, bot):
 		return self.auth_commands
@@ -28,20 +49,7 @@ class BotCommands():
 		if command not in self.auth_commands:
 			return False # not for us
 		
-		if command == 'commands':
-			commands = []
-			for command, command_auth_level in bot.helpers.get_auth_commands(bot).items():
-				if command_auth_level <= auth_level:
-					commands.append(command)
-			
-			if commands:
-				commands.sort()
-				for line in bot.helpers.list_split(commands, 10):
-					bot.send(connection, reply_target, '-' + ', '.join(str(key) for key in line), event)
-				
-				return True
-		
-		elif command == 'nick': # ResponseBot: nick BotResponder
+		if command == 'nick': # ResponseBot: nick BotResponder
 			if not parameters:
 				nicklist = bot.db.get_all('nickname|' + bot.server_name)
 				if nicklist and connection.get_nickname() != nicklist[0]:

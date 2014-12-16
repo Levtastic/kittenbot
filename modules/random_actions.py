@@ -10,8 +10,22 @@ class RandomActions():
 		'runloop': 70,
 		'stoploop': 70,
 	}
+	command_descriptions = {
+		'runloop': """
+			Runs the random action loop
+			Note: Will fail if the loop is already running
+			Syntax: runloop
+		""",
+		'stoploop': """
+			Stops the random action loop
+			Note: Will fail if the loop is not running
+			Syntax: stoploop
+		""",
+	}
 	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
 		event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)
 		
@@ -23,6 +37,10 @@ class RandomActions():
 		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 	
 	def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
 		# we're about to be replaced!

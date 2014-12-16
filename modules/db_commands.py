@@ -12,17 +12,57 @@ class DbCommands():
 	permitted_keys = ['join', 'no', 'part', 'random', 'yes']
 	
 	auth_commands = {
-		'add': 30, # unless adding non-messages, in which case 70
-		'list': 30,
-		'remove': 30, # unless removing non-messages, in which case 70
-		'keys': 30,
+		'add': 0, # unless adding non-messages, in which case 70
+		'list': 0,
+		'remove': 0, # unless removing non-messages, in which case 70
+		'keys': 0,
 		'set': 70,
 		'sql': 90,
 	}
+	command_descriptions = {
+		'add': """
+			Adds a new key / value pair to the database
+			For triggers, use any of the following characters, and for messages, use the second two:
+			~ for "anywhere in a sentence", - for "in a text message", and * for "in an action message"
+			For example, "~-test = *successfully tests!" would respond with the action "successfully tests" any time someone said the word "test" anywhere in a written message, but not in an action
+			Additionally, there are several dynamic codes that can be used in responses. For a list of these, or what they do, use "help codes"
+			Syntax: add [~-*key] = [-*value]
+		""",
+		'list': """
+			Lists matching entries in the database. Can be used to find existing responses.
+			Syntax: list [key]
+			Syntax: list [key] = [value]
+		""",
+		'remove': """
+			Removes a key/value pair from the database.
+			Can be used with only partially matching terms, but only succeeds if it only finds one match for them.
+			Syntax: remove [partial key]
+			Syntax: remove [partial key] = [partial value]
+		""",
+		'keys': """
+			Lists all the non-trigger keys in the database you have access to.
+			Syntax: keys
+		""",
+		'set': """
+			Sets a database key to a value or list of values.
+			Note: This will overwrite any previous values the key may have held
+			Syntax: set key = value1 [, value2 [, value3 [ , ... ] ] ]
+		""",
+		'sql': """
+			Runs arbitrary SQL code on the database. Obviously, be careful with this.
+			Syntax: sql -force [SQL statement]
+		""",
+	}
 	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 	
 	def get_auth_commands(self, bot):
 		return self.auth_commands

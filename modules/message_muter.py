@@ -4,15 +4,32 @@ def init():
 class MessageMuter():
 	last_mute = ''
 	auth_commands = {
-		'mute': 50,
-		'unmute': 50,
+		'mute': 0,
+		'unmute': 0,
+	}
+	command_descriptions = {
+		'mute': """
+			Stops the bot talking in the current channel
+			Undo this with the "unmute" command
+			Syntax: mute
+		""",
+		'unmute': """
+			Lets the bot talk in the current channel again
+			Syntax: unmute
+		""",
 	}
 	
 	def __init__(self):
+		event_handler.hook('help:get_command_description', self.get_command_description)
+		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
 		
 		event_handler.hook('bot:on_before_send_message', self.on_before_send_message)
+	
+	def get_command_description(self, bot, command):
+		if command in self.command_descriptions:
+			return self.command_descriptions[command]
 	
 	def get_auth_commands(self, bot):
 		return self.auth_commands
@@ -28,12 +45,12 @@ class MessageMuter():
 			# or maybe they don't want the bot to PM them, or something
 			channel = event.source.nick
 		
-		if command == 'mute' and bot.db.add('muted_targets', channel):
+		if command == 'mute' and bot.db.add('muted_targets|' + bot.server_name, channel):
 			self.last_mute = channel
 			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 			return True
 		
-		elif command == 'unmute' and bot.db.delete('muted_targets', channel):
+		elif command == 'unmute' and bot.db.delete('muted_targets|' + bot.server_name, channel):
 			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 			return True
 		
@@ -44,5 +61,5 @@ class MessageMuter():
 			self.last_mute = ''
 			return True
 		
-		if target.lower() in bot.db.get_all('muted_targets'):
+		if target.lower() in bot.db.get_all('muted_targets|' + bot.server_name):
 			return False
