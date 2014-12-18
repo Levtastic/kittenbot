@@ -2,7 +2,6 @@ def init():
 	MessageMuter()
 
 class MessageMuter():
-	last_mute = ''
 	auth_commands = {
 		'mute': 0,
 		'unmute': 0,
@@ -20,6 +19,8 @@ class MessageMuter():
 	}
 	
 	def __init__(self):
+		self.last_mute = ''
+		
 		event_handler.hook('help:get_command_description', self.get_command_description)
 		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)

@@ -52,17 +52,27 @@ class Help():
 			
 			else:
 				parameters = parameters.strip()
+				handled = False
+				
+				command_aliases = bot.helpers.get_command_aliases(bot)
+				if parameters in command_aliases:
+					parameters = command_aliases[parameters]
+				
+				aliases = [a for a, c in bot.helpers.get_command_aliases(bot).items() if c == parameters]
+				if aliases:
+					bot.send(connection, reply_target, '-Command aliases: ' + ', '.join([parameters] + aliases), event, False)
+					handled = True
+				
 				description = [r for r in event_handler.fire('help:get_command_description', (bot, parameters)) if r]
 				if description:
-					aliases = [a for a, c in bot.helpers.get_command_aliases(bot).items() if c == parameters]
-					if aliases:
-						bot.send(connection, reply_target, '-Command aliases: ' + ', '.join([parameters] + aliases), event, False)
-					
 					description = description[0]
+					
 					for line in [l.strip() for l in description.split('\n') if l.strip()]:
 						bot.send(connection, reply_target, '-' + line, event, False)
 					
-					return True
+					handled = True
+				
+				return handled
 		
 		return False
 	

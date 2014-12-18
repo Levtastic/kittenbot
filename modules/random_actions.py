@@ -4,8 +4,6 @@ def init():
 	RandomActions()
 
 class RandomActions():
-	run = True
-	talked_last = []
 	auth_commands = {
 		'runloop': 70,
 		'stoploop': 70,
@@ -24,6 +22,9 @@ class RandomActions():
 	}
 	
 	def __init__(self):
+		self.run = True
+		self.talked_last = []
+		
 		event_handler.hook('help:get_command_description', self.get_command_description)
 		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)

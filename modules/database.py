@@ -144,7 +144,7 @@ class Database():
 		else:
 			return default_value
 	
-	def get_key_value(self, key_filter, value_filter = '', default_value = ()):
+	def get_key_value(self, key_filter, value_filter = '', default_value = (None, None)):
 		if not value_filter:
 			value_filter = '%'
 		
