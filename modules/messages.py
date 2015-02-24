@@ -1,10 +1,21 @@
+import logging
+
 def init():
 	event_handler.hook('irc:on_privmsg', on_message)
 	event_handler.hook('irc:on_pubmsg', on_message)
 	event_handler.hook('irc:on_action', on_message)
 	event_handler.hook('commands:on_message', on_message)
 	
+	event_handler.hook('console:on_input', on_input)
+	
 	event_handler.hook('bot:on_send_message', on_send_message)
+
+def on_input(bot, connection, event, command):
+	if '\n' not in command:
+		on_message(bot, connection, event, 200)
+		return True
+	
+	return False
 
 def on_message(bot, connection, event, auth_level = None):
 	if event.type == 'privmsg':
@@ -19,7 +30,8 @@ def on_message(bot, connection, event, auth_level = None):
 	else:
 		return
 	
-	reply_target = is_public and event.target or event.source.nick
+	source = hasattr(event.source, 'nick') and event.source.nick or event.source
+	reply_target = is_public and event.target or source
 	
 	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, is_public, is_action, reply_target, auth_level))):
 		return False
@@ -37,6 +49,9 @@ def on_message(bot, connection, event, auth_level = None):
 	# if we get here, no handler wanted the message, so we're done - bot does nothing
 
 def on_send_message(bot, connection, target, message, event):
+	if target == '-CONSOLE':
+		return False
+	
 	message_type_matches = []
 	
 	for c in message:

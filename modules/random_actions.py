@@ -32,8 +32,9 @@ class RandomActions():
 		
 		event_handler.hook('irc:on_part', self.on_leave)
 		event_handler.hook('irc:on_kick', self.on_leave)
-		event_handler.hook('irc:on_pubmsg', self.on_message)
-		event_handler.hook('irc:on_action', self.on_message)
+		event_handler.hook('irc:on_quit', self.on_leave)
+		event_handler.hook('irc:on_pubmsg', self.on_message, 250)
+		event_handler.hook('irc:on_action', self.on_message, 250)
 		event_handler.hook('bot:on_after_send_message', self.on_after_send_message)
 		
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
@@ -70,11 +71,11 @@ class RandomActions():
 					# only message / part if we weren't the last person to talk in this channel
 					if not channel in self.talked_last:
 						if part_timing and random.randint(1, int(part_timing)) == 1 and channel in db_channels:
-							bot.send(bot.connection, channel, bot.db.get_random('part'))
+							bot.send(bot.connection, channel, bot.db.get_random('part', channel = channel))
 							bot.connection.part(channel)
 						
 						elif message_timing and random.randint(1, int(message_timing)) == 1:
-							bot.send(bot.connection, channel, bot.db.get_random('random'))
+							bot.send(bot.connection, channel, bot.db.get_random('random', channel = channel))
 				
 				# every channel we know about, but aren't in
 				for channel in [channel for channel in db_channels if channel not in bot.channels]:
@@ -103,12 +104,12 @@ class RandomActions():
 	
 	def on_after_send_message(self, bot, connection, target, message, event, sent_by_module):
 		# we just talked in this channel - we don't want to be the next to talk (responsebots are shy) so we record this for later
-		if target[0] == '#':
+		if target[0] == '#' and target not in self.talked_last:
 			self.talked_last.append(target)
 	
 	def get_auth_commands(self, bot):
 		return self.auth_commands
-
+	
 	def do_auth_command(self, bot, connection, event, command, parameters, reply_target, auth_level):
 		if command not in self.auth_commands:
 			return False # not for us

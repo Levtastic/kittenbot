@@ -21,25 +21,25 @@ class Channels():
 	def on_invite(self, bot, connection, event):
 		# invites can only be sent by channel ops, so we don't need to worry too much about this being abused
 		connection.join(event.arguments[0].lower())
-
+	
 	def on_join(self, bot, connection, event):
 		if event.source.nick == connection.get_nickname():
 			# register a callback for when we get the namreply for this channel, and know who's in it
 			# (necessary for use of !someone in greeting messages)
 			self.callback_handler.add('greetchannel-%s' % event.target, self.greet_channel, (bot, event.target, connection, event))
-
+	
 	def on_namreply(self, bot, connection, event):
 		# we just got the information that populates the channel user list? now we can greet the channel
 		self.callback_handler.run('greetchannel-%s' % event.arguments[1])
-
+	
 	def greet_channel(self, bot, channel, connection, event):
-		bot.send(connection, channel, bot.db.get_random('join'), event)
-
+		bot.send(connection, channel, bot.db.get_random('join', channel = channel), event)
+	
 	def on_needinvite(self, bot, connection, event):
 		channel = event.arguments[0]
 		if channel and channel[0] == '#':
 			bot.send(connection, 'ChanServ', '-inviteme %s' % channel, event)
-
+	
 	def on_kick(self, bot, connection, event):
 		if event.arguments[0] == connection.get_nickname():
 			self.blacklist(bot, event.target, 'Kicked by %s: %s' % (event.source.nick, event.arguments[1]))

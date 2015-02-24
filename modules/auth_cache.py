@@ -2,9 +2,9 @@ def init():
 	AuthCache()
 
 class AuthCache():
-	auth_cache = {}
-	
 	def __init__(self):
+		self.auth_cache = {}
+		
 		event_handler.hook('commands:on_get_auth_level', self.on_get_auth_level)
 		event_handler.hook('irc:on_whoisaccount', self.on_whoisaccount)
 		
@@ -23,15 +23,16 @@ class AuthCache():
 		nickname, account_name = event.arguments[0], event.arguments[1]
 		
 		if self.can_see(bot, nickname):
-			self.auth_cache[nickname] = int(bot.db.get(
-				'user|%s|%s' % (bot.server_name, account_name),
-				default_value = 0
-			))
+			cache_TTL = int(bot.db.get('cache_TTL', default_value = 60 * 60))
+			if cache_TTL != 0:
+				self.auth_cache[nickname] = int(bot.db.get('user|%s|%s' % (bot.server_name, account_name), default_value = 0))
+				if cache_TTL > 0:
+					connection.execute_delayed(cache_TTL, self.invalidate_cache, (nickname, ))
 	
 	def on_nick(self, bot, connection, event):
 		before = event.source.nick
 		after = event.target
-
+		
 		if before in self.auth_cache:
 			self.auth_cache[after] = self.auth_cache.pop(before)
 	
@@ -42,11 +43,14 @@ class AuthCache():
 			nicknames = [event.source.nick]
 		
 		for nickname in [n for n in nicknames if not self.can_see(bot, n)]:
-			self.auth_cache.pop(nickname, True)
+			self.invalidate_cache(nickname)
 	
 	def can_see(self, bot, nickname):
-		visble_nicknames = []
+		visible_nicknames = []
 		for channel in bot.channels.values():
-			visble_nicknames += channel.users()
+			visible_nicknames += channel.users()
 		
-		return nickname in visble_nicknames
+		return nickname in visible_nicknames
+	
+	def invalidate_cache(self, nickname):
+		self.auth_cache.pop(nickname, True)

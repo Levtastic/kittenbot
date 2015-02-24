@@ -23,7 +23,7 @@ def main():
 		datefmt = '%m/%d/%Y %H:%M:%S'
 	)
 	ResponseBot(
-		nickname = 'ResponseBot',
+		nickname = 'KittenBot',
 		realname = 'KittenBot (admin contact: Lev)',
 		server_name = sys.argv[2],
 		server = server,

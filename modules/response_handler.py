@@ -64,7 +64,7 @@ class ResponseHandler():
 			else:
 				message = event.arguments[0]
 			
-			message = bot.db.get_reply(message, message_type_code)
+			message = bot.db.get_reply(message, message_type_code, channel = reply_target)
 			if message:
 				bot.send(connection, reply_target, message, event)
 				return True
@@ -77,7 +77,7 @@ class ResponseHandler():
 		
 		# get channel from event if possible, otherwise use passed variables
 		if event:
-			speaker = event.source.nick
+			speaker = hasattr(event.source, 'nick') and event.source.nick or event.source
 			channel = event.target 
 		else:
 			# in this context there is no speaker,

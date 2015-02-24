@@ -58,6 +58,9 @@ class Help():
 				if parameters in command_aliases:
 					parameters = command_aliases[parameters]
 				
+				if bot.helpers.get_auth_commands(bot)[parameters] > auth_level:
+					return False
+				
 				aliases = [a for a, c in bot.helpers.get_command_aliases(bot).items() if c == parameters]
 				if aliases:
 					bot.send(connection, reply_target, '-Command aliases: ' + ', '.join([parameters] + aliases), event, False)

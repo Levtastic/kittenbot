@@ -8,6 +8,9 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		# init bot framework
 		irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, realname)
 		
+		# set lenient encoding to avoid encoding-related crash
+		irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+		
 		# store passed variables for later use
 		self.server_name = server_name
 		self.module_parameters = module_parameters
@@ -22,7 +25,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 			self.connection.set_rate_limit(rate_limit)
 		
 		# hook into IRC event handler to pass events to our event handler
-		self.manifold.add_global_handler("all_events", self._irc_events)
+		self.reactor.add_global_handler('all_events', self._irc_events)
 		
 		# init event
 		self.module_handler.fire_event('bot:finish_init', self)

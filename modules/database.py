@@ -8,7 +8,7 @@ def init():
 
 class Database():
 	def __init__(self, db_name):
-		self.last_random_ids = {}
+		self.last_random_values = {}
 		
 		self.database = sqlite3.connect(db_name)
 		self.database.create_function('message_match', 4, self.message_match)
@@ -173,16 +173,12 @@ class Database():
 		else:
 			return default_value
 	
-	def get_random(self, key_filter, default_value = ''):
-		if key_filter.lower() in self.last_random_ids:
-			last_id = self.last_random_ids[key_filter.lower()]
-		else:
-			last_id = 0
+	def get_random(self, key_filter, default_value = '', channel = '_'):
+		last_value = self.last_random_values.get(channel, '')
 		
 		with closing(self.database.cursor()) as cursor:
 			cursor.execute("""
 				SELECT
-					id,
 					value
 				FROM
 					vars
@@ -190,33 +186,29 @@ class Database():
 					key LIKE ?
 				ORDER BY
 					CASE
-						WHEN id = ? THEN 1
+						WHEN value = ? THEN 1
 						ELSE 0
 					END ASC,
 					RANDOM()
 				LIMIT
 					1
 			""",
-				(key_filter, last_id)
+				(key_filter, last_value)
 			)
 			result = cursor.fetchone()
 		
 		if result:
-			self.last_random_ids[key_filter.lower()] = result[0]
-			return result[1]
+			self.last_random_values[channel] = result[0]
+			return result[0]
 		else:
 			return default_value
 	
-	def get_reply(self, message, message_type_code, default_value = ''):
-		if message.lower() in self.last_random_ids:
-			last_id = self.last_random_ids[message.lower()]
-		else:
-			last_id = 0
+	def get_reply(self, message, message_type_code, default_value = '', channel = '_'):
+		last_value = self.last_random_values.get(channel, '')
 		
 		with closing(self.database.cursor()) as cursor:
 			cursor.execute("""
 				SELECT
-					id,
 					value
 				FROM
 					vars
@@ -238,20 +230,20 @@ class Database():
 						ELSE 0
 					END DESC,
 					CASE
-						WHEN id = ? THEN 1
+						WHEN value = ? THEN 1
 						ELSE 0
 					END ASC,
 					RANDOM()
 				LIMIT
 					1
 			""",
-				(message, message_type_code, self.get('levenshtein_threshhold', default_value = 1), last_id)
+				(message, message_type_code, self.get('levenshtein_threshhold', default_value = 1), last_value)
 			)
 			result = cursor.fetchone()
 		
 		if result:
-			self.last_random_ids[message.lower()] = result[0]
-			return result[1]
+			self.last_random_values[channel] = result[0]
+			return result[0]
 		else:
 			return default_value
 	
@@ -398,7 +390,10 @@ class Database():
 			value_filter = '%'
 		
 		if not override_check and self.check_exists(key_filter, value_filter) != 1:
-			return False
+			key_filter, value_filter = value_filter, key_filter
+			
+			if self.check_exists(key_filter, value_filter) != 1:
+				return False
 		
 		with closing(self.database.cursor()) as cursor:
 			cursor.execute("""

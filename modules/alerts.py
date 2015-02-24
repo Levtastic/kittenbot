@@ -19,28 +19,34 @@ class Alerts():
 		self.callback_handler = CallbackHandler()
 	
 	def on_undo(self, bot, connection, event, command, parameters, reply_target, auth_level):
-		message = 'Undid last for %s in %s' % (event.source.nick, event.target)
+		source = hasattr(event.source, 'nick') and event.source.nick or event.source
+		
+		message = 'Undid last for %s in %s' % (source, event.target)
 		
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event)
+			bot.send(connection, contact, '-' + message, event, False)
 	
 	def on_redo(self, bot, connection, event, command, parameters, reply_target, auth_level):
-		message = 'Redid last for %s in %s' % (event.source.nick, event.target)
+		source = hasattr(event.source, 'nick') and event.source.nick or event.source
+		
+		message = 'Redid last for %s in %s' % (source, event.target)
 		
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event)
+			bot.send(connection, contact, '-' + message, event, False)
 	
 	def on_after_add(self, bot, connection, event, reply_target, auth_level, key, value):
-		message = 'Learned "%s = %s" from %s in %s' % (key, value, event.source.nick, event.target)
+		source = hasattr(event.source, 'nick') and event.source.nick or event.source
+		
+		message = 'Learned "%s = %s" from %s in %s' % (key, value, source, event.target)
 		
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event)
+			bot.send(connection, contact, '-' + message, event, False)
 	
 	def on_before_remove(self, bot, connection, event, reply_target, auth_level, key, value):
 		db_key, old_value = bot.db.get_key_value(key, value)
@@ -67,17 +73,21 @@ class Alerts():
 		self.callback_handler.run('set|%s|%s' % (key, '|'.join(values)))
 	
 	def send_remove_message(self, bot, connection, event, key, old_value):
-		message = 'Forgot "%s = %s" for %s in %s' % (key, old_value, event.source.nick, event.target)
+		source = hasattr(event.source, 'nick') and event.source.nick or event.source
+		
+		message = 'Forgot "%s = %s" for %s in %s' % (key, old_value, source, event.target)
 		
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event)
+			bot.send(connection, contact, '-' + message, event, False)
 	
 	def send_set_message(self, bot, connection, event, key, old_values, new_values):
-		message = '%s set from "%s" to "%s" by %s in %s' % (key, ', '.join(old_values), ', '.join(new_values), event.source.nick, event.target)
+		source = hasattr(event.source, 'nick') and event.source.nick or event.source
+		
+		message = '%s set from "%s" to "%s" by %s in %s' % (key, ', '.join(old_values), ', '.join(new_values), source, event.target)
 		
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event)
+			bot.send(connection, contact, '-' + message, event, False)

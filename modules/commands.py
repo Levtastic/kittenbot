@@ -10,6 +10,8 @@ class Commands():
 		# commands get checked first - other modules shouldn't be able to override commands from happening
 		event_handler.hook('messages:on_handle_messages', self.on_handle_message, 0)
 		
+		event_handler.hook('commands:do_command', self.do_command)
+		
 		event_handler.hook('irc:on_whoisaccount', self.on_whoisaccount)
 		event_handler.hook('irc:on_endofwhois', self.on_endofwhois)
 		
@@ -78,7 +80,7 @@ class Commands():
 			
 			logging.info('"%s" command issued by %s (%d) in %s' % (
 				event.arguments[0],
-				event.source.nick,
+				hasattr(event.source, 'nick') and event.source.nick or event.source,
 				auth_level,
 				event.target,
 			))

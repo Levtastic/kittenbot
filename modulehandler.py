@@ -1,10 +1,15 @@
-import importlib
+import importlib, imp
 import logging
 import glob
 import sys
 import os
 
 from eventhandler import EventHandler
+
+try:
+	reload_func = importlib.reload
+except AttributeError:
+	reload_func = imp.reload # fallback for < 3.4
 
 class ModuleHandler():
 	def __init__(self, bot):
@@ -26,7 +31,7 @@ class ModuleHandler():
 		for module in module_names:
 			if module in sys.modules:
 				module = sys.modules[module]
-				importfunc = importlib.reload
+				importfunc = reload_func
 			else:
 				importfunc = importlib.import_module
 			
