@@ -80,7 +80,7 @@ class Commands():
 			
 			logging.info('"%s" command issued by %s (%d) in %s' % (
 				event.arguments[0],
-				hasattr(event.source, 'nick') and event.source.nick or event.source,
+				event.source.nick,
 				auth_level,
 				event.target,
 			))

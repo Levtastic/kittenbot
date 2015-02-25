@@ -1,5 +1,5 @@
 from modules.resources.async_input import AsyncInput
-from irc.client import Event
+from irc.client import Event, NickMask
 import logging
 
 def init():
@@ -44,7 +44,7 @@ class BackDoorConsole():
 			# nicknames with "-" as the first character, so we know this won't be a real nick
 			event = Event(
 				type = event_type,
-				source = '-CONSOLE',
+				source = NickMask('-CONSOLE'),
 				target = connection.get_nickname(),
 				arguments = (command, )
 			)

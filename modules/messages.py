@@ -30,7 +30,7 @@ def on_message(bot, connection, event, auth_level = None):
 	else:
 		return
 	
-	source = hasattr(event.source, 'nick') and event.source.nick or event.source
+	source = event.source.nick
 	reply_target = is_public and event.target or source
 	
 	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, is_public, is_action, reply_target, auth_level))):
