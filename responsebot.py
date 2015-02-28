@@ -54,7 +54,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 			return False
 		
 		sent_by_module = True
-		if not any(result is True for result in self.module_handler.fire_event('bot:on_send_message', (self, connection, target, message, event))):
+		if not any(result is True for result in self.module_handler.fire_event('bot:on_send_message', (self, connection, target, message, event, process_message))):
 			try:
 				# default behaviour, if nothing has overridden it
 				connection.privmsg(target, message)

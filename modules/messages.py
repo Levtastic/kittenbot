@@ -48,8 +48,11 @@ def on_message(bot, connection, event, auth_level = None):
 	
 	# if we get here, no handler wanted the message, so we're done - bot does nothing
 
-def on_send_message(bot, connection, target, message, event):
+def on_send_message(bot, connection, target, message, event, process_message):
 	if target == '-CONSOLE':
+		return False
+	
+	if not process_message:
 		return False
 	
 	message_type_matches = []
