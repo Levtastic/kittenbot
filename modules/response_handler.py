@@ -54,19 +54,19 @@ class ResponseHandler():
 		if command in self.command_descriptions:
 			return self.command_descriptions[command]
 	
-	def on_handle_message(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
+	def on_handle_message(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
 		message_type_code = is_action and '*' or '-'
 		
 		# Try to get a message as-is, then try swapping in aliases
 		for name in [False, connection.get_nickname()] + bot.db.get_all('nick_alias'):
 			if name:
-				message = re.sub(re.escape(name), '!me', event.arguments[0], flags = re.IGNORECASE)
+				processed_message = re.sub(re.escape(name), '!me', message, flags = re.IGNORECASE)
 			else:
-				message = event.arguments[0]
+				processed_message = message
 			
-			message = bot.db.get_reply(message, message_type_code, channel = reply_target)
-			if message:
-				bot.send(connection, reply_target, message, event)
+			processed_message = bot.db.get_reply(processed_message, message_type_code, channel = reply_target)
+			if processed_message:
+				bot.send(connection, reply_target, processed_message, event)
 				return True
 		
 		return False

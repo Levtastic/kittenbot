@@ -1,4 +1,5 @@
 import logging
+import format
 
 def init():
 	event_handler.hook('irc:on_privmsg', on_message)
@@ -32,13 +33,14 @@ def on_message(bot, connection, event, auth_level = None):
 	
 	source = event.source.nick
 	reply_target = is_public and event.target or source
+	message = format.filter(event.arguments[0])
 	
-	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, is_public, is_action, reply_target, auth_level))):
+	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, message, is_public, is_action, reply_target, auth_level))):
 		return False
 	
 	for handler in event_handler.get_handlers('messages:on_handle_messages'):
 		try:
-			if handler(bot, connection, event, is_public, is_action, reply_target, auth_level) is True:
+			if handler(bot, connection, event, message, is_public, is_action, reply_target, auth_level) is True:
 				return
 		
 		except BaseException as e:

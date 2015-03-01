@@ -77,11 +77,11 @@ class Dice():
 		
 		return True
 	
-	def on_handle_messages(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
+	def on_handle_messages(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
 		if is_public:
-			message_split = event.arguments[0].split(':', 1)
+			message_split = message.split(':', 1)
 		else:
-			message_split = (bot.connection.get_nickname(), event.arguments[0])
+			message_split = (bot.connection.get_nickname(), message)
 		
 		if len(message_split) == 2 and message_split[0].lower().strip() == bot.connection.get_nickname().lower():
 			# they're talking directly to us
