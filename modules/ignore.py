@@ -56,7 +56,7 @@ class Ignore():
 		
 		return False
 	
-	def on_before_handle_messages(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
+	def on_before_handle_messages(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
 		for regex in bot.db.get_all('ignore_host|' + bot.server_name):
 			if re.match(regex, str(event.source)):
 				return False

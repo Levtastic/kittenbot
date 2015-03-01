@@ -17,16 +17,16 @@ class Commands():
 		
 		self.callback_handler = CallbackHandler()
 	
-	def on_handle_message(self, bot, connection, event, is_public, is_action, reply_target, auth_level):
+	def on_handle_message(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
 		if not is_action:
 			command = None
 			
 			if not is_public:
-				command = event.arguments[0].strip()
+				command = message.strip()
 			else:
 				# also try splitting by comma
 				# also, allow any of the nick aliases to be after the colon / comma
-				message_split = event.arguments[0].split(':', 1)
+				message_split = message.split(':', 1)
 				if len(message_split) == 2 and message_split[0].lower().strip() == bot.connection.get_nickname().lower():
 					command = message_split[1]
 			
