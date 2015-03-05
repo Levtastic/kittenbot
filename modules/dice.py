@@ -67,15 +67,19 @@ class Dice():
 				
 				total += sum(results)
 				count += len(results)
-		
-		message = 'got %d from %s' % (total, ' + '.join(messages))
-		
-		if count > 1 and len(message) < 50:
-			bot.send(connection, reply_target, message, event)
-		else:
-			bot.send(connection, reply_target, str(total), event)
-		
-		return True
+			
+			long_message_template = bot.db.get('dice_long_reply_template', default_value = 'got %(total)d from %(workings)s')
+			short_message_template = bot.db.get('dice_short_reply_template', default_value = 'got %(total)d')
+			
+			long_message = long_message_template % {'total': total, 'workings': ' + '.join(messages)}
+			short_message = short_message_template % {'total': total, 'workings': ' + '.join(messages)}
+			
+			if count > 1 and len(long_message) < 50:
+				bot.send(connection, reply_target, long_message, event)
+			else:
+				bot.send(connection, reply_target, short_message, event)
+			
+			return True
 	
 	def on_handle_messages(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
 		if is_public:
