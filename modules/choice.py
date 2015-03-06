@@ -32,7 +32,7 @@ class Choose():
 			return False # not for us
 		
 		if command == 'choose':
-			options = [s.strip() for s in parameters.split(' or ')]
+			options = list(set(s.strip() for s in parameters.split(' or ') if s.strip() != ''))
 			if len(options) < 2:
 				return False
 			
