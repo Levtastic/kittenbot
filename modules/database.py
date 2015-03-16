@@ -237,7 +237,7 @@ class Database():
 				LIMIT
 					1
 			""",
-				(message, message_type_code, self.get('levenshtein_threshhold', default_value = 1), last_value)
+				(message.strip(), message_type_code, self.get('levenshtein_threshhold', default_value = 1), last_value)
 			)
 			result = cursor.fetchone()
 		
