@@ -1,5 +1,5 @@
 import logging
-import format
+import modules.resources.format
 
 def init():
 	event_handler.hook('irc:on_privmsg', on_message)
