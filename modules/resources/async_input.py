@@ -1,6 +1,10 @@
 import time
-import readline
 from threading import Thread
+
+try:
+	import readline
+except ImportError:
+	pass
 
 try: # py2
 	_import = __import__('queue', fromlist = ['Queue'])
