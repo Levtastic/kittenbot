@@ -24,11 +24,11 @@ class AsyncInput():
 			This class is designed to run in the background of a larger application, and allow back-door console access.
 			The main program should periodically call get() to get user-entered multi-line inputs one at a time.
 			
-			This class starts listening for user input on start(), and stops after the NEXT successful input on stop().
+			This class starts listening for user input on start().
 			You MUST call start() after creating an instance if you want user input to be collected.
 			
 			By default the class will continually get user input until stopped.
-			If you only want one input, call start() with get_one set to True.
+			If you only want one input, set ready to False when calling get().
 			
 			@after: if not None, is printed after input successfully received.
 			@prefix: output before each line of input.

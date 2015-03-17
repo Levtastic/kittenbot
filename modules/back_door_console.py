@@ -1,6 +1,6 @@
 from modules.resources.async_input import AsyncInput
 from irc.client import Event, NickMask
-import logging
+import logging, datetime
 
 def init():
 	BackDoorConsole()
@@ -8,10 +8,8 @@ def init():
 class BackDoorConsole():
 	def __init__(self):
 		self.run = False
-		if hasattr(bot, 'ai'):
-			bot.ai.stop()
 		
-		bot.ai = AsyncInput()
+		bot.ai = AsyncInput(prefix = '> ')
 		bot.ai.start(False)
 		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
@@ -20,6 +18,9 @@ class BackDoorConsole():
 		event_handler.hook('bot:on_send_message', self.on_send_message)
 	
 	def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
+		if hasattr(bot, 'ai'):
+			bot.ai.stop()
+		
 		self.run = False
 	
 	def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
@@ -75,13 +76,16 @@ class BackDoorConsole():
 		
 		bot.connection.execute_delayed(1, self.command_loop, (bot, event_handler))
 	
-	def on_send_message(self, bot, connection, target, message, event):
+	def on_send_message(self, bot, connection, target, message, event, process_message):
 		if target == '-CONSOLE':
-			if message[0] == '-':
-				message = '> %s' % message[1:]
+			if process_message:
+				if message[0] == '-':
+					message = '- %s' % message[1:]
+				
+				elif message[0] == '*':
+					message = '* %s' % message[1:]
 			
-			elif message[0] == '*':
-				message = '* %s' % message[1:]
+			message = '[%s] %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
 			
 			print(message)
 			return True
