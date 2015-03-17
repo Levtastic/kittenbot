@@ -9,7 +9,7 @@ class BackDoorConsole():
 	def __init__(self):
 		self.run = False
 		
-		bot.ai = AsyncInput(prefix = '> ')
+		bot.ai = AsyncInput(prefix = '%s > ' % bot.server_name)
 		bot.ai.start(False)
 		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
