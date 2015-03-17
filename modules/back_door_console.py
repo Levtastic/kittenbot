@@ -12,7 +12,7 @@ class BackDoorConsole():
 			bot.ai.stop()
 		
 		bot.ai = AsyncInput()
-		bot.ai.start()
+		bot.ai.start(False)
 		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
 		event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)

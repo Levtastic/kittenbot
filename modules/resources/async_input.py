@@ -45,8 +45,9 @@ class AsyncInput():
 		self.sentinel = sentinel
 		self.delimiter = delimiter
 	
-	def start(self):
+	def start(self, ready = True):
 		self.running = True
+		self._ready = ready
 		
 		thread = Thread(target = self._main_loop)
 		thread.daemon = True # this thread can't keep the program alive
