@@ -8,9 +8,11 @@ def init():
 class BackDoorConsole():
 	def __init__(self):
 		self.run = False
-		if not hasattr(bot, 'ai'):
-			bot.ai = AsyncInput()
-			bot.ai.start()
+		if hasattr(bot, 'ai'):
+			bot.ai.stop()
+		
+		bot.ai = AsyncInput()
+		bot.ai.start()
 		
 		event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
 		event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)
@@ -28,7 +30,7 @@ class BackDoorConsole():
 		if not self.run:
 			return
 		
-		command = bot.ai.get()
+		command = bot.ai.get(False)
 		
 		if command:
 			connection = bot.connection # for now - in future, able to tab between connections?
@@ -68,6 +70,8 @@ class BackDoorConsole():
 				
 				except BaseException as e:
 					print('%s: %s' % (type(e).__name__, str(e)))
+			
+		bot.ai.ready()
 		
 		bot.connection.execute_delayed(1, self.command_loop, (bot, event_handler))
 	

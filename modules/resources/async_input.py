@@ -1,3 +1,5 @@
+import time
+import readline
 from threading import Thread
 
 try: # py2
@@ -11,9 +13,6 @@ try: # py2
 	input = raw_input
 except NameError: # py3
 	pass
-
-# TODO: look into the "curses" module for a full wrapper experience with input and output while keeping the input at the bottom
-# once we're using curses, switch from threading to multiprocess, so we can force terminate - multiprocess doesn't allow the usual stdin/stdout (raw_input/print)
 
 class AsyncInput():
 	def __init__(self, after = None, prefix = '', sentinel = None, delimiter = '\\'):
@@ -35,15 +34,15 @@ class AsyncInput():
 		
 		self.queue = Queue()
 		self.running = False
+		self._ready = True
 		
 		self.after = after
 		self.prefix = prefix
 		self.sentinel = sentinel
 		self.delimiter = delimiter
 	
-	def start(self, get_one = False):
-		if not get_one:
-			self.running = True
+	def start(self):
+		self.running = True
 		
 		thread = Thread(target = self._main_loop)
 		thread.daemon = True # this thread can't keep the program alive
@@ -55,18 +54,27 @@ class AsyncInput():
 	def empty(self):
 		return self.queue.empty()
 	
-	def get(self):
+	def get(self, ready = True):
+		self._ready = ready
+		
 		if not self.queue.empty():
 			return self.queue.get(False)
 		
 		return None
 	
+	def ready(self):
+		self._ready = True
+	
 	def _main_loop(self):
 		while self.running:
-			self.queue.put(self._get_input())
+			if self.queue.empty() and self._ready:
+				self.queue.put(self._get_input())
+				
+				if self.after is not None:
+					print(self.after)
 			
-			if self.after is not None:
-				print(self.after)
+			else:
+				time.sleep(0.2)
 	
 	def _get_input(self):
 		get_input = lambda: input(self.prefix)
