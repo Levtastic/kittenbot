@@ -26,7 +26,7 @@ class Alerts():
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event, False)
+			bot.send(connection, contact, message, event, False)
 	
 	def on_redo(self, bot, connection, event, command, parameters, reply_target, auth_level):
 		source = hasattr(event.source, 'nick') and event.source.nick or event.source
@@ -36,7 +36,7 @@ class Alerts():
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event, False)
+			bot.send(connection, contact, message, event, False)
 	
 	def on_after_add(self, bot, connection, event, reply_target, auth_level, key, value):
 		source = hasattr(event.source, 'nick') and event.source.nick or event.source
@@ -46,7 +46,7 @@ class Alerts():
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event, False)
+			bot.send(connection, contact, message, event, False)
 	
 	def on_before_remove(self, bot, connection, event, reply_target, auth_level, key, value):
 		db_key, old_value = bot.db.get_key_value(key, value)
@@ -80,7 +80,7 @@ class Alerts():
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event, False)
+			bot.send(connection, contact, message, event, False)
 	
 	def send_set_message(self, bot, connection, event, key, old_values, new_values):
 		source = hasattr(event.source, 'nick') and event.source.nick or event.source
@@ -90,4 +90,4 @@ class Alerts():
 		logging.info(message)
 		
 		for contact in bot.db.get_all('alert_contact'):
-			bot.send(connection, contact, '-' + message, event, False)
+			bot.send(connection, contact, message, event, False)
