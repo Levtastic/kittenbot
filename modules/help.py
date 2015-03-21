@@ -47,7 +47,7 @@ class Help():
 					for line in bot.helpers.list_split(commands, 10):
 						bot.send(connection, reply_target, '-' + ', '.join(str(key) for key in line), event)
 					
-					bot.send(connection, reply_target, '-Use "help [command]" for more information on a specific command', event)
+					bot.send(connection, reply_target, 'Use "help [command]" for more information on a specific command', event)
 					return True
 			
 			else:
@@ -58,12 +58,13 @@ class Help():
 				if parameters in command_aliases:
 					parameters = command_aliases[parameters]
 				
-				if bot.helpers.get_auth_commands(bot)[parameters] > auth_level:
+				commands = bot.helpers.get_auth_commands(bot)
+				if parameters in commands and commands[parameters] > auth_level:
 					return False
 				
 				aliases = [a for a, c in bot.helpers.get_command_aliases(bot).items() if c == parameters]
 				if aliases:
-					bot.send(connection, reply_target, '-Command aliases: ' + ', '.join([parameters] + aliases), event, False)
+					bot.send(connection, reply_target, 'Command aliases: ' + ', '.join([parameters] + aliases), event, False)
 					handled = True
 				
 				description = [r for r in event_handler.fire('help:get_command_description', (bot, parameters)) if r]
@@ -71,7 +72,7 @@ class Help():
 					description = description[0]
 					
 					for line in [l.strip() for l in description.split('\n') if l.strip()]:
-						bot.send(connection, reply_target, '-' + line, event, False)
+						bot.send(connection, reply_target, line, event, False)
 					
 					handled = True
 				
