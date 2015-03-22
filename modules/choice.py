@@ -32,12 +32,23 @@ class Choose():
 			return False # not for us
 		
 		if command == 'choose':
-			options = list(set(s.strip() for s in parameters.split(' or ') if s.strip() != ''))
+			options = [self.process_option(s) for s in parameters.split(' or ')]
+			options = [option for option in options if option]
+			options = set(options)
+			
 			if len(options) < 2:
 				return False
 			
 			message_template = bot.db.get('choice_reply_template', default_value = '%(choice)s')
 			
-			bot.send(connection, reply_target, message_template % {'choice': random.choice(options)}, event)
+			bot.send(connection, reply_target, message_template % {'choice': random.choice(list(options))}, event)
 			
 			return True
+	
+	def process_option(self, option):
+		option = option.strip()
+		
+		if option[-1] == ',':
+			option = option[:-1].strip()
+		
+		return option
