@@ -7,8 +7,8 @@ class Undo():
 	undo_stack = []
 	redo_stack = []
 	auth_commands = {
-		'undo': 0,
-		'redo': 0,
+		'undo': 30,
+		'redo': 30,
 	}
 	command_descriptions = {
 		'undo': """
