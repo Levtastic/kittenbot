@@ -9,7 +9,7 @@ def init():
 # (recurse - aliases may shift over time and the second request may not result in the final destination)
 # don't follow if query specifically asks for @, to allow seeing and deleting
 class DbCommands():
-	permitted_keys = ['join', 'no', 'part', 'random', 'yes']
+	permitted_keys = ['join', 'no', 'part', 'random', 'yes', 'kick']
 	
 	auth_commands = {
 		'add': 0, # unless adding non-messages, in which case 70
