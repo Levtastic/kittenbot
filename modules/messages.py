@@ -1,5 +1,5 @@
 import logging
-import modules.resources.format
+from modules.resources.format import filter
 
 def init():
 	event_handler.hook('irc:on_privmsg', on_message)
@@ -33,7 +33,7 @@ def on_message(bot, connection, event, auth_level = None):
 	
 	source = event.source.nick
 	reply_target = is_public and event.target or source
-	message = format.filter(event.arguments[0])
+	message = filter(event.arguments[0])
 	
 	if any(result is False for result in event_handler.fire('messages:on_before_handle_messages', (bot, connection, event, message, is_public, is_action, reply_target, auth_level))):
 		return False
