@@ -1,23 +1,26 @@
-import collections, re
+import re
+from collections import defaultdict
 
 def init():
 	BanWord()
 
 class BanWord():
 	auth_commands = {
-		'banword': 50,
-		'unbanword': 50,
+		'banword': 0,
+		'unbanword': 0,
 	}
 	command_descriptions = {
 		'banword': """
 			Sets a new (case insensitive) banned word
 			Banned words cause the speaker to be immediately kicked with a variable length ban
 			[minutes] defaults to 5 if omitted
+			Only works for channel operators
 			Syntax: banword [minutes] [word]
 		""",
 		'unbanword': """
 			Removes a (case insensitive) banned word
 			Banned words cause the speaker to be immediately kicked with a variable length ban
+			Only works for channel operators
 			Syntax: unbanword [word]
 		""",
 	}
@@ -32,14 +35,14 @@ class BanWord():
 		
 		event_handler.hook('messages:on_handle_messages', self.on_handle_messages)
 		
-		self.banned_words = collections.defaultdict(dict)
+		self.banned_words = defaultdict(dict)
 		self.banned_patterns = {}
 	
 	def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
 		bot.module_parameters['banword:banned_words'] = self.banned_words
 	
 	def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
-		self.banned_words = bot.module_parameters.pop('banword:banned_words', collections.defaultdict(dict))
+		self.banned_words = bot.module_parameters.pop('banword:banned_words', defaultdict(dict))
 	
 	def get_command_description(self, bot, command):
 		if command in self.command_descriptions:
@@ -67,6 +70,10 @@ class BanWord():
 					bot.send(connection, reply_target, ', '.join(line), event, False)
 				
 				return True
+			
+			# if the person speaking isn't op in this channel, drop out
+			if not bot.channels[reply_target].is_oper(event.source.nick):
+				return False
 		
 		if command == 'banword':
 			split = parameters.split(' ', 1)
