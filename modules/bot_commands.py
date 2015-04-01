@@ -82,7 +82,7 @@ class BotCommands():
 					try:
 						exec(command)
 					except BaseException as e:
-						bot.send(connection, reply_target, '-%s: %s' % (type(e).__name__, str(e)), event)
+						bot.send(connection, reply_target, '%s: %s' % (type(e).__name__, str(e)), event, False)
 					else:
 						bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 					
