@@ -40,6 +40,11 @@ class Ignore():
 		if command not in self.auth_commands:
 			return False # not for us
 		
+		parameters = parameters.strip()
+		
+		if not parameters:
+			return False
+		
 		if command == 'ignore':
 			try:
 				re.compile(parameters)
