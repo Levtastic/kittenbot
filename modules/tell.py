@@ -46,9 +46,6 @@ class Tell():
 		if command not in self.auth_commands:
 			return False # not for us
 		
-		if not parameters:
-			return False
-		
 		if command == 'tell':
 			try:
 				nick, message = parameters.strip().split(' ', 1)
