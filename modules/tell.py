@@ -83,15 +83,15 @@ class Tell():
 			minutes, seconds = divmod(remainder, 60)
 			
 			time_pieces = []
-			days and time_pieces.append('%d day%s' % (days, days > 1 and 's' or ''))
-			hours and time_pieces.append('%d hour%s' % (hours, hours > 1 and 's' or ''))
-			minutes and time_pieces.append('%d minute%s' % (minutes, minutes > 1 and 's' or ''))
-			seconds and time_pieces.append('%d second%s' % (seconds, seconds > 1 and 's' or ''))
+			days and time_pieces.append(self.format_time_piece('day', days))
+			hours and time_pieces.append(self.format_time_piece('hour', hours))
+			minutes and time_pieces.append(self.format_time_piece('minute', minutes))
+			seconds and time_pieces.append(self.format_time_piece('second', seconds))
 			
-			message = '%s: message from %s %s ago: %s' % (
+			message = '%s: message from %s %s: %s' % (
 				event.source.nick,
 				stored_message.source.nick,
-				', '.join(time_pieces),
+				time_pieces and ', '.join(time_pieces) + ' ago' or 'just now',
 				stored_message.message,
 			)
 			
@@ -100,6 +100,9 @@ class Tell():
 		self.messages[reply_target][speaker_key].clear()
 		
 		return False
+	
+	def format_time_piece(self, name, value):
+		return '%d %s%s' % (value, name, value > 1 and 's' or '')
 
 class StoredMessage():
 	def __init__(self, destination, source, message):
