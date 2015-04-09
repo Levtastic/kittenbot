@@ -25,7 +25,7 @@ class Tell():
 		event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
 		event_handler.hook('commands:do_auth_command', self.do_auth_command)
 		
-		event_handler.hook('messages:on_handle_messages', self.on_handle_messages)
+		event_handler.hook('messages:on_handle_messages', self.on_handle_messages, -1)
 		
 		self.messages = defaultdict(lambda: defaultdict(list))
 	
@@ -54,6 +54,13 @@ class Tell():
 				nick, message = parameters.strip().split(' ', 1)
 			except ValueError:
 				return False
+			
+			message = message.strip()
+			for word in bot.db.get_all('tell_prefix'):
+				word_len = len(word)
+				if message[:word_len].lower() == word.lower():
+					message = message[word_len:].strip()
+					break
 			
 			self.messages[reply_target][nick.lower()].append(
 				StoredMessage(nick, event.source, message.strip())
