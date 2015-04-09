@@ -12,6 +12,7 @@ class Tell():
 		'tell': """
 			Stores a message to be sent later when someone is around
 			[message] will be sent to [nick] whenever they next speak in the channel the command was issued in
+			This command will not work in private messages sent to the bot
 			Syntax: tell [nick] [message]
 		""",
 	}
@@ -47,6 +48,9 @@ class Tell():
 			return False # not for us
 		
 		if command == 'tell':
+			if reply_target[0] != '#':
+				return False
+			
 			try:
 				nick, message = parameters.strip().split(' ', 1)
 			except ValueError:
