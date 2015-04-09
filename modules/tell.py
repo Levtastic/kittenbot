@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 def init():
@@ -56,7 +56,7 @@ class Tell():
 				return False
 			
 			self.messages[reply_target][nick.lower()].append(
-				StoredMessage(datetime.now(), nick, event.source, message)
+				StoredMessage(nick, event.source, message.strip())
 			)
 			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 			return True
@@ -76,14 +76,17 @@ class Tell():
 			time_delta = datetime.now() - stored_message.datetime
 			
 			days = time_delta.days
+			if days:
+				time_delta -= timedelta(days = days)
+			
 			hours, remainder = divmod(time_delta.seconds, 3600)
 			minutes, seconds = divmod(remainder, 60)
 			
 			time_pieces = []
-			days and time_pieces.append('%s days' % days)
-			hours and time_pieces.append('%s hours' % hours)
-			minutes and time_pieces.append('%s minutes' % minutes)
-			seconds and time_pieces.append('%s seconds' % seconds)
+			days and time_pieces.append('%d day%s' % (days, days > 1 and 's' or ''))
+			hours and time_pieces.append('%d hour%s' % (hours, hours > 1 and 's' or ''))
+			minutes and time_pieces.append('%d minute%s' % (minutes, minutes > 1 and 's' or ''))
+			seconds and time_pieces.append('%d second%s' % (seconds, seconds > 1 and 's' or ''))
 			
 			message = '%s: message from %s %s ago: %s' % (
 				event.source.nick,
@@ -99,8 +102,9 @@ class Tell():
 		return False
 
 class StoredMessage():
-	def __init__(self, datetime, destination, source, message):
-		self.datetime = datetime
+	def __init__(self, destination, source, message):
 		self.destination = destination
 		self.source = source
 		self.message = message
+		
+		self.datetime = datetime.now()
