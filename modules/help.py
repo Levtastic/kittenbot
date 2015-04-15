@@ -36,6 +36,8 @@ class Help():
 			return False # not for us
 		
 		if command == 'help':
+			reply_target = event.source.nick
+			
 			if not parameters:
 				commands = []
 				for command, command_auth_level in bot.helpers.get_auth_commands(bot).items():
