@@ -20,7 +20,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
 		
 		# max messages a second, to avoid flooding out
 		# note: may cause blocking which could make the bot fail to respond to a ping
-		rate_limit = int(self.db.get('connection_rate_limit', default_value = 0))
+		rate_limit = float(self.db.get('connection_rate_limit', default_value = 0))
 		if rate_limit:
 			self.connection.set_rate_limit(rate_limit)
 		
