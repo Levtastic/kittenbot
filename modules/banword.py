@@ -6,16 +6,30 @@ def init():
 
 class BanWord():
 	auth_commands = {
+		'channelbanword': 50,
 		'banword': 0,
+		'channelunbanword': 50,
 		'unbanword': 0,
 	}
 	command_descriptions = {
+		'channelbanword': """
+			Sets a new (case insensitive) banned word for the given channel
+			Banned words cause the speaker to be immediately kicked with a variable length ban
+			[minutes] defaults to 5 if omitted
+			Syntax: banword [channel] [minutes] [word]
+		""",
 		'banword': """
 			Sets a new (case insensitive) banned word
 			Banned words cause the speaker to be immediately kicked with a variable length ban
 			[minutes] defaults to 5 if omitted
 			Only works for channel operators
 			Syntax: banword [minutes] [word]
+		""",
+		'channelunbanword': """
+			Removes a (case insensitive) banned word for the given channel
+			Banned words cause the speaker to be immediately kicked with a variable length ban
+			Only works for channel operators
+			Syntax: unbanword [channel] [word]
 		""",
 		'unbanword': """
 			Removes a (case insensitive) banned word
@@ -42,7 +56,7 @@ class BanWord():
 		bot.module_parameters['banword:banned_words'] = self.banned_words
 	
 	def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
-		self.banned_words = bot.module_parameters.pop('banword:banned_words', defaultdict(dict))
+		self.banned_words = bot.module_parameters.pop('banword:banned_words', self.banned_words)
 	
 	def get_command_description(self, bot, command):
 		if command in self.command_descriptions:
@@ -103,6 +117,56 @@ class BanWord():
 			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
 			return True
 		
+		elif command == 'channelbanword':
+			split = parameters.split(' ', 2)
+			if len(split) == 1:
+				words = list(self.banned_words[parameters])
+				if not words:
+					return False
+				
+				for line in bot.helpers.list_split(words, 10):
+					bot.send(connection, reply_target, ', '.join(line), event, False)
+				
+				return True
+			
+			try:
+				channel, minutes, word = split[0], float(split[1]), split[2]
+			except (ValueError, IndexError):
+				split = parameters.split(' ', 1)
+				channel, minutes, word = split[0], 5.0, split[1]
+			
+			self.banned_words[channel][word.lower()] = minutes
+			self.banned_patterns.pop(channel, None)
+			
+			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
+			return True
+		
+		elif command == 'channelunbanword':
+			try:
+				channel, word = parameters.split(' ', 1)
+			except ValueError:
+				words = list(self.banned_words[parameters])
+				if not words:
+					return False
+				
+				for line in bot.helpers.list_split(words, 10):
+					bot.send(connection, reply_target, ', '.join(line), event, False)
+				
+				return True
+			
+			try:
+				del self.banned_words[channel][word.lower()]
+			except KeyError:
+				return False
+			
+			if len(self.banned_words[channel]) == 0:
+				del self.banned_words[channel]
+			
+			self.banned_patterns.pop(channel, None)
+			
+			bot.send(connection, reply_target, bot.db.get_random('yes'), event)
+			return True
+		
 		return False
 	
 	def on_handle_messages(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
@@ -116,6 +180,9 @@ class BanWord():
 		
 		# if the person speaking *is* op in this channel, drop out
 		if bot.channels[reply_target].is_oper(event.source.nick):
+			pass #return False
+		
+		if not self.banned_words[reply_target]:
 			return False
 		
 		# make the pattern if it doesn't exist
