@@ -75,12 +75,12 @@ class Tell():
 		if not is_public:
 			return False
 		
-		speaker_key = event.source.nick.lower()
+		messages = self.messages[reply_target][event.source.nick.lower()]
 		
-		if not self.messages[reply_target][speaker_key]:
+		if not messages:
 			return False
 		
-		for stored_message in self.messages[reply_target][speaker_key]:
+		for stored_message in messages:
 			time_delta = datetime.now() - stored_message.datetime
 			
 			days = time_delta.days
@@ -105,7 +105,7 @@ class Tell():
 			
 			bot.send(connection, reply_target, message, event, process_message = False)
 		
-		self.messages[reply_target][speaker_key].clear()
+		messages.clear()
 		
 		return False
 	
