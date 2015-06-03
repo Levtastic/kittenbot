@@ -292,11 +292,13 @@ class Database():
 				FROM
 					vars
 				WHERE
-						key LIKE ?
-					%s
-						value LIKE ?
+					(
+							key LIKE ?
+						%s
+							value LIKE ?
+					)
 			""" % binary_comparison + (
-				messages_only and 'AND (key LIKE "~%" OR key LIKE "%-%" OR key LIKE "%*%")' or ''
+				messages_only and 'AND SUBSTR(value, 1, 1) IN ("~", "-", "*")' or ''
 			) + """
 				ORDER BY
 					id ASC
@@ -385,7 +387,7 @@ class Database():
 		self.database.commit()
 		return True
 	
-	def delete(self, key_filter, value_filter = '', override_check = False):
+	def delete(self, key_filter, value_filter = '', override_check = False, auth_level = None):
 		if not value_filter:
 			value_filter = '%'
 		
@@ -394,6 +396,11 @@ class Database():
 			
 			if self.check_exists(key_filter, value_filter) != 1:
 				return False
+
+		if auth_level is not None and auth_level < 70:
+			messages_only = 'AND SUBSTR(value, 1, 1) IN ("~", "-", "*")'
+		else:
+			messages_only = ''
 		
 		with closing(self.database.cursor()) as cursor:
 			cursor.execute("""
@@ -403,7 +410,7 @@ class Database():
 						key LIKE ?
 					AND
 						value LIKE ?
-			""",
+			""" + messages_only,
 				(key_filter, value_filter)
 			)
 		
