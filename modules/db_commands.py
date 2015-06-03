@@ -206,19 +206,20 @@ class DbCommands():
 		if not message:
 			return message
 		
-		ordered_message = self.order_message_type_codes(message, is_key)
-		if not ordered_message and auth_level < 70:
-			if not is_key or message not in self.permitted_keys:
-				return False
-		
-		message = ordered_message or message
-		
-		if ordered_message:
-			for name in [connection.get_nickname()] + bot.db.get_all('nick_alias'):
-				message = re.sub(re.escape(name), '!me', message, flags = re.IGNORECASE)
-		
 		if wildcard:
 			message = message and '%' + message + '%'
+		
+		else: # adding or something like that, so require the ~-* starting codes
+			ordered_message = self.order_message_type_codes(message, is_key)
+			if not ordered_message and auth_level < 70:
+				if not is_key or message not in self.permitted_keys:
+					return False
+			
+			message = ordered_message or message
+			
+			if ordered_message:
+				for name in [connection.get_nickname()] + bot.db.get_all('nick_alias'):
+					message = re.sub(re.escape(name), '!me', message, flags = re.IGNORECASE)
 		
 		return message
 
