@@ -4,9 +4,9 @@ import irc.bot
 from modulehandler import ModuleHandler
 
 class ResponseBot(irc.bot.SingleServerIRCBot):
-    def __init__(self, nickname, realname, server_name, server, port = 6667, module_parameters = {}):
+    def __init__(self, nickname, realname, server_name, server, module_parameters = {}):
         # init bot framework
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, realname)
+        irc.bot.SingleServerIRCBot.__init__(self, [server], nickname, realname)
         
         # set lenient encoding to avoid encoding-related crash
         irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
@@ -20,9 +20,9 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
         
         # max messages a second, to avoid flooding out
         # note: may cause blocking which could make the bot fail to respond to a ping
-        rate_limit = float(self.db.get('connection_rate_limit', default_value = 0))
+        rate_limit = self.db.get('connection_rate_limit|' + server_name) or self.db.get('connection_rate_limit')
         if rate_limit:
-            self.connection.set_rate_limit(rate_limit)
+            self.connection.set_rate_limit(float(rate_limit))
         
         # hook into IRC event handler to pass events to our event handler
         self.reactor.add_global_handler('all_events', self._irc_events)
