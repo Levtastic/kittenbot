@@ -45,8 +45,11 @@ class Channels():
     
     def on_needinvite(self, bot, connection, event):
         channel = event.arguments[0]
-        if channel and channel[0] == '#' and bot.server_name == 'GameSurge':
-            bot.send(connection, 'ChanServ', 'inviteme ' + channel, event, False)
+        if channel and channel[0] == '#':
+            for command in bot.db.get_all('invite_command|' + bot.server_name):
+                target, message = command.split('|', 1)
+                message = message % {'channel': channel}
+                bot.send(connection, target, message, event, False)
     
     def on_before_send_message(self, bot, connection, target, message, event):
         if target[0] == '#' and target not in bot.channels:
