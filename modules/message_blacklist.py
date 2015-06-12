@@ -9,6 +9,9 @@ class MessageBlacklist():
         event_handler.hook('bot:on_before_send_message', self.on_before_send_message)
     
     def on_before_send_message(self, bot, connection, target, message, event):
+        if target == '-CONSOLE':
+            return True
+        
         for blacklist in bot.db.get_all('message_blacklist'):
             if re.match(blacklist, message):
                 message = 'Blacklist "%s" blocked message "%s" from being sent to %s' % (blacklist, message, target)
