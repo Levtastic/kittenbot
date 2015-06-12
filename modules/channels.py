@@ -37,8 +37,13 @@ class Channels():
             self.callback_handler.add('greetchannel-%s' % event.target, self.greet_channel, (bot, event.target, connection, event))
     
     def on_namreply(self, bot, connection, event):
+        channel = event.arguments[1]
         # we just got the information that populates the channel user list? now we can greet the channel
-        self.callback_handler.run('greetchannel-%s' % event.arguments[1])
+        self.callback_handler.run('greetchannel-%s' % channel)
+        
+        # if there's only one nick in here, it's us, so we remove the channel from autojoin
+        if len(bot.channels[channel].users()) == 1:
+            bot.db.delete('channel|' + bot.server_name, channel)
     
     def greet_channel(self, bot, channel, connection, event):
         bot.send(connection, channel, bot.db.get_random('join', channel = channel), event)
