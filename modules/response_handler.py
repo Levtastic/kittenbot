@@ -44,11 +44,11 @@ class ResponseHandler():
         event_handler.hook('bot:on_process_message', self.on_process_message)
         
         # create regex patterns for case insensitive replacing
-        self.speaker_pattern    = re.compile(re.escape('!speaker'),    re.IGNORECASE)
-        self.channel_pattern    = re.compile(re.escape('!channel'),    re.IGNORECASE)
-        self.someone_pattern    = re.compile(re.escape('!someone'),    re.IGNORECASE)
-        self.me_pattern            = re.compile(re.escape('!me'),        re.IGNORECASE)
-        self.server_pattern        = re.compile(re.escape('!server'),    re.IGNORECASE)
+        self.speaker_pattern = re.compile(re.escape('!speaker'), re.IGNORECASE)
+        self.channel_pattern = re.compile(re.escape('!channel'), re.IGNORECASE)
+        self.someone_pattern = re.compile(re.escape('!someone'), re.IGNORECASE)
+        self.me_pattern      = re.compile(re.escape('!me'),      re.IGNORECASE)
+        self.server_pattern  = re.compile(re.escape('!server'),  re.IGNORECASE)
     
     def get_command_description(self, bot, command):
         if command in self.command_descriptions:
