@@ -28,7 +28,7 @@ class Channels():
     def on_kick(self, bot, connection, event):
         # if we get kicked, remove the channel
         if event.arguments[0] == connection.get_nickname():
-            bot.db.delete('channel|' + bot.server_name, channel)
+            bot.db.delete('channel|' + bot.server_name, event.target)
     
     def on_join(self, bot, connection, event):
         if event.source.nick == connection.get_nickname():
