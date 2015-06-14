@@ -78,7 +78,6 @@ class ResponseHandler():
         # get channel from event if possible, otherwise use passed variables
         if event:
             speaker = event.source.nick
-            channel = event.target 
         else:
             # in this context there is no speaker,
             # so if anyone uses it, it'll return the current bot name
