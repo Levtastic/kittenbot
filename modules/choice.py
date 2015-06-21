@@ -32,12 +32,12 @@ class Choose():
             return False # not for us
         
         if command == 'choose':
-            options = [self.process_option(s) for s in parameters.split(' or ')]
+            options = {self.process_option(s) for s in parameters.split(' or ')}
             options = [option for option in options if option]
-            options = list(set(options))
             
-            if len(options) < 2 and options[0].lower() != '!someone':
-                return False
+            if len(options) < 2:
+                if not options or options[0].lower() != '!someone':
+                    return False
             
             message_template = bot.db.get('choice_reply_template', default_value = '%(choice)s')
             
@@ -48,7 +48,7 @@ class Choose():
     def process_option(self, option):
         option = option.strip()
         
-        if option[-1] == ',':
+        if option and option[-1] == ',':
             option = option[:-1].strip()
         
         return option
