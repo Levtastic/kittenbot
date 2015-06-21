@@ -34,14 +34,14 @@ class Choose():
         if command == 'choose':
             options = [self.process_option(s) for s in parameters.split(' or ')]
             options = [option for option in options if option]
-            options = set(options)
+            options = list(set(options))
             
-            if len(options) < 2:
+            if len(options) < 2 and options[0].lower() != '!someone':
                 return False
             
             message_template = bot.db.get('choice_reply_template', default_value = '%(choice)s')
             
-            bot.send(connection, reply_target, message_template % {'choice': random.choice(list(options))}, event)
+            bot.send(connection, reply_target, message_template % {'choice': random.choice(options)}, event)
             
             return True
     
