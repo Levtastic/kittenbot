@@ -1,6 +1,8 @@
 import logging
 import sqlite3
 
+import modules.resources.string_similarity as ss
+
 from contextlib import closing
 
 def init():
@@ -22,7 +24,7 @@ class Database():
         except BaseException:
             pass
     
-    def message_match(self, db_key, input_message, input_message_type_code, levenshtein_threshhold):
+    def message_match(self, db_key, input_message, input_message_type_code, match_similarity):
         try:
             message_type_matches = []
             
@@ -45,7 +47,7 @@ class Database():
             if '~' in message_type_matches and db_message in input_message:
                 return True
             
-            if self.relative_levenshtein(db_message, input_message) >= float(levenshtein_threshhold):
+            if ss.similarity(db_message, input_message) >= float(match_similarity):
                 return True
             
             return False
@@ -54,24 +56,6 @@ class Database():
             print(error)
             logging.exception(error)
             return False
-    
-    def relative_levenshtein(self, a, b):
-        n, m = len(a), len(b)
-        if n > m:
-            a, b = b, a
-            n, m = m, n
-        
-        current = range(n + 1)
-        for i in range(1, m + 1):
-            previous, current = current, [i] + [0] * n
-            for j in range(1, n + 1):
-                add, delete = previous[j] + 1, current[j - 1] + 1
-                change = previous[j - 1]
-                if a[j - 1] != b[i - 1]:
-                    change = change + 1
-                current[j] = min(add, delete, change)
-        
-        return 1 - current[n] / m
     
     def key_start(self, key):
         split = '|'
@@ -237,7 +221,7 @@ class Database():
                 LIMIT
                     1
             """,
-                (message.strip(), message_type_code, self.get('levenshtein_threshhold', default_value = 1), last_value)
+                (message.strip(), message_type_code, self.get('message_match_similarity', default_value = 1), last_value)
             )
             result = cursor.fetchone()
         
