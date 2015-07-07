@@ -52,7 +52,12 @@ class AdminMessage():
             except BaseException:
                 return False
             
-            self.messages.append((regex, message.strip()))
+            message = message.strip()
+            
+            if not message:
+                return False
+            
+            self.messages.append((regex, message))
             
             bot.send(connection, reply_target, bot.db.get_random('yes'), event)
             return True
