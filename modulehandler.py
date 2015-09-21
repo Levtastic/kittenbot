@@ -29,7 +29,7 @@ class ModuleHandler():
         
         logging.info('Loading modules')
         module_files = glob.glob(os.path.dirname(__file__) + '/modules/*.py')
-        module_names = ['modules.' + os.path.basename(f)[:-3] for f in module_files if f != '__init__.py']
+        module_names = ['modules.' + os.path.basename(f)[:-3] for f in module_files]
         imported_modules = self._load_module_list(module_names, first_time)
         if not imported_modules:
             return False
@@ -61,6 +61,9 @@ class ModuleHandler():
     def _load_module_list(self, list, first_time):
         loaded_modules = []
         for module in list:
+            if module.endswith('__init__'):
+                continue
+        
             if module in sys.modules:
                 module = sys.modules[module]
                 importfunc = reload_func
