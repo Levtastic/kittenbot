@@ -74,7 +74,7 @@ class BackDoorConsole():
             
         bot.ai.ready()
         
-        bot.connection.execute_delayed(1, self.command_loop, (bot, event_handler))
+        bot.execute_delayed(bot.connection, 1, self.command_loop, (bot, event_handler))
     
     def on_send_message(self, bot, connection, target, message, event, process_message):
         if target == '-CONSOLE':

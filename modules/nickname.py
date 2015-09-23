@@ -24,7 +24,7 @@ class Nickname():
                 return # must have been manually renicked
             
             if nicklist.index(event.target) != 0:
-                connection.execute_delayed(self.nick_delay, self.get_ideal_nick, (bot, connection))
+                bot.execute_delayed(connection, self.nick_delay, self.get_ideal_nick, (bot, connection))
     
     def get_ideal_nick(self, bot, connection):
         nicklist = self.names()
@@ -43,7 +43,7 @@ class Nickname():
         
         new_nick = nicklist[new_nick_position]
         if new_nick == connection.get_nickname():
-            connection.execute_delayed(self.nick_delay, self.get_ideal_nick, (bot, connection))
+            bot.execute_delayed(connection, self.nick_delay, self.get_ideal_nick, (bot, connection))
         else:
             connection.nick(new_nick)
     

@@ -205,7 +205,8 @@ class BanWord():
                 connection.mode(reply_target, '+b *!%s' % event.source.userhost)
                 
                 # set unban in future
-                connection.execute_delayed(
+                bot.execute_delayed(
+                    connection,
                     minutes * 60,
                     lambda: connection.mode(reply_target, '-b *!%s' % event.source.userhost)
                 )

@@ -80,5 +80,19 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
                 print(error)
         
         # die later, after any final issues have been handled
-        connection.execute_delayed(1, self.die, (message, ))
+        self.execute_delayed(connection, 1, self.die, (message, ))
         return True
+    
+    def execute_delayed(self, connection, delay, function, arguments):
+        def wrapper(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            
+            except BaseException as e:
+                error = 'Exception in delayed execution: %s: %s' % (type(e).__name__, e)
+                logging.exception(error)
+                print(error)
+                
+                return False
+        
+        return connection.execute_delayed(delay, wrapper, arguments)

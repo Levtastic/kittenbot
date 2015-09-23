@@ -58,40 +58,32 @@ class RandomActions():
             return
         
         repeat_timer = 1
+        part_timing = int(bot.db.get('part_timing', default_value = 0))
+        join_timing = int(bot.db.get('join_timing', default_value = 0))
+        message_timing = int(bot.db.get('message_timing', default_value = 0))
         
-        try:
-            part_timing = int(bot.db.get('part_timing', default_value = 0))
-            join_timing = int(bot.db.get('join_timing', default_value = 0))
-            message_timing = int(bot.db.get('message_timing', default_value = 0))
+        if bot.connection.is_connected() and (part_timing or join_timing or message_timing):
+            db_channels = bot.db.get_all('channel|' + bot.server_name)
             
-            if bot.connection.is_connected() and (part_timing or join_timing or message_timing):
-                db_channels = bot.db.get_all('channel|' + bot.server_name)
-                
-                for channel in bot.channels:
-                    # only message / part if we weren't the last person to talk in this channel
-                    if not channel in self.talked_last:
-                        if part_timing and random.randint(1, int(part_timing)) == 1 and channel in db_channels:
-                            bot.send(bot.connection, channel, bot.db.get_random('part', channel = channel))
-                            bot.connection.part(channel)
-                        
-                        elif message_timing and random.randint(1, int(message_timing)) == 1:
-                            bot.send(bot.connection, channel, bot.db.get_random('random', channel = channel))
-                
-                # every channel we know about, but aren't in
-                for channel in [channel for channel in db_channels if channel not in bot.channels]:
-                    if join_timing and random.randint(1, int(join_timing)) == 1:
-                        bot.connection.join(channel)
+            for channel in bot.channels:
+                # only message / part if we weren't the last person to talk in this channel
+                if not channel in self.talked_last:
+                    if part_timing and random.randint(1, int(part_timing)) == 1 and channel in db_channels:
+                        bot.send(bot.connection, channel, bot.db.get_random('part', channel = channel))
+                        bot.connection.part(channel)
+                    
+                    elif message_timing and random.randint(1, int(message_timing)) == 1:
+                        bot.send(bot.connection, channel, bot.db.get_random('random', channel = channel))
             
-            else:
-                repeat_timer = 60 # try again later
+            # every channel we know about, but aren't in
+            for channel in [channel for channel in db_channels if channel not in bot.channels]:
+                if join_timing and random.randint(1, int(join_timing)) == 1:
+                    bot.connection.join(channel)
         
-        except BaseException as e:
-            error = 'random messages loop hit an exception: %s: %s' % (key, type(e).__name__, e)
-            logging.exception(error)
-            print(error)
-            self.run = False # don't keep repeating the mistake
+        else:
+            repeat_timer = 60 # try again later
         
-        bot.connection.execute_delayed(repeat_timer, self.random_messages_loop, (bot, ))
+        bot.execute_delayed(bot.connection, repeat_timer, self.random_messages_loop, (bot, ))
     
     def on_leave(self, bot, connection, event):
         if event.source.nick == connection.get_nickname() and event.target in self.talked_last:

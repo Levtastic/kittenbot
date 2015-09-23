@@ -27,7 +27,7 @@ class AuthCache():
             if cache_TTL != 0:
                 self.auth_cache[nickname] = int(bot.db.get('user|%s|%s' % (bot.server_name, account_name), default_value = 0))
                 if cache_TTL > 0:
-                    connection.execute_delayed(cache_TTL, self.invalidate_cache, (nickname, ))
+                    bot.execute_delayed(connection, cache_TTL, self.invalidate_cache, (nickname, ))
     
     def on_nick(self, bot, connection, event):
         before = event.source.nick
