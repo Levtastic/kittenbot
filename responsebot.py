@@ -88,7 +88,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
             try:
                 return function(*args, **kwargs)
             
-            except BaseException as e:
+            except (StandardError, StopIteration, GeneratorExit) as e:
                 error = 'Exception in delayed execution: %s: %s' % (type(e).__name__, e)
                 logging.exception(error)
                 print(error)
