@@ -1,6 +1,6 @@
 import logging
 
-from callbackhandler import CallbackHandler
+from modules.resources.callbackhandler import CallbackHandler
 
 def init():
     Alerts()
@@ -16,7 +16,7 @@ class Alerts():
         event_handler.hook('db_commands:on_before_set', self.on_before_set)
         event_handler.hook('db_commands:on_after_set', self.on_after_set)
         
-        self.callback_handler = CallbackHandler()
+        self.callback_handler = CallbackHandler('alerts')
     
     def on_undo(self, bot, connection, event, command, parameters, reply_target, auth_level):
         source = hasattr(event.source, 'nick') and event.source.nick or event.source

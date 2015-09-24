@@ -1,6 +1,6 @@
 import logging
 
-from callbackhandler import CallbackHandler
+from modules.resources.callbackhandler import CallbackHandler
 
 def init():
     Commands()
@@ -15,7 +15,7 @@ class Commands():
         event_handler.hook('irc:on_whoisaccount', self.on_whoisaccount)
         event_handler.hook('irc:on_endofwhois', self.on_endofwhois)
         
-        self.callback_handler = CallbackHandler()
+        self.callback_handler = CallbackHandler('commands')
     
     def on_handle_message(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
         if not is_action:

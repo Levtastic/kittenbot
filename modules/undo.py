@@ -1,4 +1,4 @@
-from callbackhandler import CallbackHandler
+from modules.resources.callbackhandler import CallbackHandler
 
 def init():
     Undo()
@@ -38,7 +38,7 @@ class Undo():
         event_handler.hook('db_commands:on_before_set', self.on_before_set)
         event_handler.hook('db_commands:on_after_set', self.on_after_set)
         
-        self.callback_handler = CallbackHandler()
+        self.callback_handler = CallbackHandler('undo')
     
     def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
         # we're about to be replaced!

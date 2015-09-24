@@ -1,4 +1,4 @@
-from callbackhandler import CallbackHandler
+from modules.resources.callbackhandler import CallbackHandler
 
 def init():
     Channels()
@@ -16,7 +16,7 @@ class Channels():
         event_handler.hook('bot:on_before_send_message', self.on_before_send_message)
         event_handler.hook('bot:on_quit', self.on_quit)
         
-        self.callback_handler = CallbackHandler()
+        self.callback_handler = CallbackHandler('channels')
     
     def on_invite(self, bot, connection, event):
         # invites can only be sent by channel ops, so we don't need to
