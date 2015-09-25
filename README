@@ -5,3 +5,5 @@ Effort has been made to keep all kitten-like code in the database, and not in th
 Highly configurable through database values, and highly modular allowing new functionality to be bolted on.
 
 Basically a "my first irc bot" project, and also a "my first git repo" experience.
+
+There's a [wiki](https://github.com/Levtastic/kittenbot/wiki) detailing some of the nuts and bolts of the bot.
