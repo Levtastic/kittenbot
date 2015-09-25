@@ -36,8 +36,8 @@ class AuthCache():
         if before in self.auth_cache:
             self.auth_cache[after] = self.auth_cache.pop(before)
     
-    def on_refresh(self, bot, channel, event):
-        if event.source.nick == channel.get_nickname():
+    def on_refresh(self, bot, connection, event):
+        if event.source.nick == connection.get_nickname():
             nicknames = self.auth_cache.keys()
         else:
             nicknames = [event.source.nick]
