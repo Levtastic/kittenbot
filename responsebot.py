@@ -37,6 +37,11 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
         self.module_handler.fire_event('bot:on_start', self)
         super(ResponseBot, self).start()
     
+    def get_version(self):
+        version_info = [info for info in self.module_handler.fire_event('bot:on_get_version', self) if info]
+        version_info.append(super(ResponseBot, self).get_version())
+        return ' | '.join(version_info)
+    
     def send(self, connection, target, message, event = None, process_message = True):
         if any(result is False for result in self.module_handler.fire_event('bot:on_before_send_message', (self, connection, target, message, event))):
             return False
@@ -88,7 +93,10 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
             try:
                 return function(*args, **kwargs)
             
-            except (StandardError, StopIteration, GeneratorExit) as e:
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            
+            except BaseException as e:
                 error = 'Exception in delayed execution: %s: %s' % (type(e).__name__, e)
                 logging.exception(error)
                 print(error)

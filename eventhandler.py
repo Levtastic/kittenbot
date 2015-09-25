@@ -79,7 +79,10 @@ class EventHandler():
                     # finally, run the handler with our correct-length parameter list
                     result = handler(*parameters)
             
-            except (StandardError, StopIteration, GeneratorExit) as e:
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            
+            except BaseException as e:
                 error = 'event "%s" hit an exception in a handler: %s: %s' % (key, type(e).__name__, e)
                 logging.exception(error)
                 print(error)
