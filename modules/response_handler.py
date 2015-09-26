@@ -56,6 +56,7 @@ class ResponseHandler():
     
     def on_handle_message(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
         message_type_code = is_action and '*' or '-'
+        message = self.me_pattern.sub('', message)
         
         # Try to get a message as-is, then try swapping in aliases
         for name in [False, connection.get_nickname()] + bot.db.get_all('nick_alias'):
