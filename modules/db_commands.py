@@ -218,7 +218,9 @@ class DbCommands():
             message = ordered_message or message
             
             if ordered_message:
-                for name in [connection.get_nickname()] + bot.db.get_all('nick_alias'):
+                names = [connection.get_nickname()] + bot.db.get_all('nick_alias')
+                names.sort(key = len, reverse = True)
+                for name in names:
                     message = re.sub(re.escape(name), '!me', message, flags = re.IGNORECASE)
         
         return message
