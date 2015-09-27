@@ -14,6 +14,7 @@ class Database():
         
         self.database = sqlite3.connect(db_name)
         self.database.create_function('message_match', 4, self.message_match)
+        self.database.create_function('message_similarity', 2, ss.similarity)
         self.database.create_function('key_start', 1, self.key_start)
         if not self.database_exists():
             self.build_database()
@@ -199,7 +200,7 @@ class Database():
                 WHERE
                         SUBSTR(key, 1, 1) IN ('~', '-', '*')
                     AND
-                        message_match(key, ?, ?, ?)
+                        message_match(key, :message, :message_type, :similarity)
                 ORDER BY
                     CASE
                         WHEN SUBSTR(key, 1, 1) = '~' THEN 1
@@ -214,14 +215,20 @@ class Database():
                         ELSE 0
                     END DESC,
                     CASE
-                        WHEN value = ? THEN 1
+                        WHEN value = :last_value THEN 1
                         ELSE 0
                     END ASC,
+                    message_similarity(key, :message) DESC,
                     RANDOM()
                 LIMIT
                     1
             """,
-                (message.strip(), message_type_code, self.get('message_match_similarity', default_value = 1), last_value)
+                {
+                    'message': message.strip(),
+                    'message_type': message_type_code,
+                    'similarity': self.get('message_match_similarity', default_value = 1),
+                    'last_value': last_value,
+                }
             )
             result = cursor.fetchone()
         
