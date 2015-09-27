@@ -32,6 +32,7 @@ class Choose():
             return False # not for us
         
         if command == 'choose':
+            parameters = parameters.replace('my', 'your').replace('me', 'you')
             options = {self.process_option(s) for s in parameters.split(' or ')}
             options = [option for option in options if option]
             
