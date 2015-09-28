@@ -57,7 +57,7 @@ class MessageMuter():
         
         return False
     
-    def on_before_send_message(self, bot, connection, target, message, event):
+    def on_before_send_message(self, bot, connection, target, message, event, process_message):
         if target == self.last_mute:
             self.last_mute = ''
             return True

@@ -8,7 +8,7 @@ class MessageBlacklist():
     def __init__(self):
         event_handler.hook('send:on_before_send_message', self.on_before_send_message)
     
-    def on_before_send_message(self, bot, connection, target, message, event):
+    def on_before_send_message(self, bot, connection, target, message, event, process_message):
         if target == '-CONSOLE':
             return True
         

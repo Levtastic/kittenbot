@@ -4,7 +4,7 @@ def init():
     bot.send = types.MethodType(send, bot)
 
 def send(self, connection, target, message, event = None, process_message = True):
-    if any(result is False for result in self.module_handler.fire_event('send:on_before_send_message', (self, connection, target, message, event))):
+    if any(result is False for result in self.module_handler.fire_event('send:on_before_send_message', (self, connection, target, message, event, process_message))):
         return False
     
     if process_message:

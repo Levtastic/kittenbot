@@ -56,7 +56,7 @@ class Channels():
                 message = message % {'channel': channel}
                 bot.send(connection, target, message, event, False)
     
-    def on_before_send_message(self, bot, connection, target, message, event):
+    def on_before_send_message(self, bot, connection, target, message, event, process_message):
         if target[0] == '#' and target not in bot.channels:
             return False
         
