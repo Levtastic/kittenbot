@@ -1,4 +1,4 @@
-import types
+import types, logging
 
 def init():
     bot.send = types.MethodType(send, bot)
