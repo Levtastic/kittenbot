@@ -45,6 +45,9 @@ class AsyncInput():
         self.sentinel = sentinel
         self.delimiter = delimiter
     
+    def __del__(self):
+        self.running = False
+    
     def start(self, ready = True):
         self.running = True
         self._ready = ready

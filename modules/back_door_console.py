@@ -71,8 +71,9 @@ class BackDoorConsole():
                 
                 except BaseException as e:
                     print('%s: %s' % (type(e).__name__, str(e)))
-            
-        bot.ai.ready()
+        
+        if self.run:
+            bot.ai.ready()
         
         bot.execute_delayed(bot.connection, 1, self.command_loop, (bot, event_handler))
     
