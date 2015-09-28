@@ -12,12 +12,20 @@ class BackDoorConsole():
         bot.ai = AsyncInput(prefix = '%s > ' % bot.server_name)
         bot.ai.start(False)
         
+        event_handler.hook('bot:on_quit', self.on_quit)
+        
         event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
         event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)
         
         event_handler.hook('send:on_send_message', self.on_send_message)
     
+    def on_quit(self, bot, connection, event, message):
+        self.stop(bot)
+    
     def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
+        self.stop(bot)
+    
+    def stop(self, bot):
         if hasattr(bot, 'ai'):
             bot.ai.stop()
         
