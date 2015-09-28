@@ -15,7 +15,7 @@ class BackDoorConsole():
         event_handler.hook('modulehandler:before_init_modules', self.on_before_init_modules)
         event_handler.hook('modulehandler:after_load_modules', self.on_after_load_modules)
         
-        event_handler.hook('bot:on_send_message', self.on_send_message)
+        event_handler.hook('send:on_send_message', self.on_send_message)
     
     def on_before_init_modules(self, module_handler, bot, event_handler, first_time):
         if hasattr(bot, 'ai'):

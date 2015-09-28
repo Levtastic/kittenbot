@@ -26,7 +26,7 @@ class MessageMuter():
         event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
         event_handler.hook('commands:do_auth_command', self.do_auth_command)
         
-        event_handler.hook('bot:on_before_send_message', self.on_before_send_message)
+        event_handler.hook('send:on_before_send_message', self.on_before_send_message)
     
     def get_command_description(self, bot, command):
         if command in self.command_descriptions:

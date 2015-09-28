@@ -41,7 +41,7 @@ class ResponseHandler():
         # responses get checked last - only do this if no other module had a use for the message
         event_handler.hook('messages:on_handle_messages', self.on_handle_message, 1000)
         
-        event_handler.hook('bot:on_process_message', self.on_process_message)
+        event_handler.hook('send:on_process_message', self.on_process_message)
         
         # create regex patterns for case insensitive replacing
         self.speaker_pattern = re.compile(re.escape('!speaker'), re.IGNORECASE)

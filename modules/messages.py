@@ -9,7 +9,7 @@ def init():
     
     event_handler.hook('console:on_input', on_input)
     
-    event_handler.hook('bot:on_send_message', on_send_message)
+    event_handler.hook('send:on_send_message', on_send_message)
 
 def on_input(bot, connection, event, command):
     if '\n' not in command:

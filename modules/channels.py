@@ -13,7 +13,7 @@ class Channels():
         event_handler.hook('irc:on_inviteonlychan', self.on_needinvite)
         event_handler.hook('irc:on_badchannelkey', self.on_needinvite)
         
-        event_handler.hook('bot:on_before_send_message', self.on_before_send_message)
+        event_handler.hook('send:on_before_send_message', self.on_before_send_message)
         event_handler.hook('bot:on_quit', self.on_quit)
         
         self.callback_handler = CallbackHandler('channels')

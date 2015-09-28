@@ -42,35 +42,15 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
         version_info.append(super(ResponseBot, self).get_version())
         return ' | '.join(version_info)
     
-    def send(self, connection, target, message, event = None, process_message = True):
-        if any(result is False for result in self.module_handler.fire_event('bot:on_before_send_message', (self, connection, target, message, event))):
+    def send(self, connection, target, message, *args, **kwargs):
+        try:
+            # default behaviour, if nothing has overridden it
+            connection.privmsg(target, message)
+        except BaseException as e:
+            error = 'unable to send "%s" to %s: %s: %s' % (message, target, type(e).__name__, e)
+            logging.exception(error)
+            print(error)
             return False
-        
-        if process_message:
-            for process_function in self.module_handler.get_event_handlers('bot:on_process_message'):
-                try:
-                    message = process_function(self, message, connection, event, target)
-                except BaseException as e:
-                    error = 'error in message processing function: %s: %s' % (type(e).__name__, e)
-                    logging.exception(error)
-                    print(error)
-        
-        if not message or not isinstance(message, str):
-            return False
-        
-        sent_by_module = True
-        if not any(result is True for result in self.module_handler.fire_event('bot:on_send_message', (self, connection, target, message, event, process_message))):
-            try:
-                # default behaviour, if nothing has overridden it
-                connection.privmsg(target, message)
-                sent_by_module = False
-            except BaseException as e:
-                error = 'unable to send "%s" to %s: %s: %s' % (message, target, type(e).__name__, e)
-                logging.exception(error)
-                print(error)
-                return False
-        
-        self.module_handler.fire_event('bot:on_after_send_message', (self, connection, target, message, event, sent_by_module))
         
         return True
     
