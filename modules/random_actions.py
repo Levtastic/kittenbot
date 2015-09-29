@@ -33,8 +33,7 @@ class RandomActions():
         event_handler.hook('irc:on_part', self.on_leave)
         event_handler.hook('irc:on_kick', self.on_leave)
         event_handler.hook('irc:on_quit', self.on_leave)
-        event_handler.hook('irc:on_pubmsg', self.on_message, 250)
-        event_handler.hook('irc:on_action', self.on_message, 250)
+        event_handler.hook('messages:on_handle_messages', self.on_message, 0)
         event_handler.hook('send:on_after_send_message', self.on_after_send_message)
         
         event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
@@ -89,10 +88,12 @@ class RandomActions():
         if event.source.nick == connection.get_nickname() and event.target in self.talked_last:
             self.talked_last.remove(event.target)
     
-    def on_message(self, bot, connection, event):
+    def on_message(self, bot, connection, event, message, is_public, is_action, reply_target, auth_level):
         # we just got a message! We're no longer the last person to talk here
         if event.target in self.talked_last:
             self.talked_last.remove(event.target)
+        
+        return False
     
     def on_after_send_message(self, bot, connection, target, message, event, sent_by_module):
         # we just talked in this channel - we don't want to be the next to talk (responsebots are shy) so we record this for later
