@@ -22,7 +22,15 @@ class Help():
         event_handler.hook('commands:do_auth_command', self.do_auth_command)
     
     def on_after_load_modules(self, module_handler, bot, event_handler, first_time):
-        self.auth_commands['help'] = min(bot.helpers.get_auth_commands(bot).values())
+        self.auth_commands['help'] = min(self.list_auth_commands(bot).values())
+    
+    def list_auth_commands(self, bot):
+        auth_commands = {}
+        for result in event_handler.fire('commands:get_auth_commands', bot):
+            if result:
+                auth_commands.update(result)
+        
+        return auth_commands
     
     def get_command_description(self, bot, command):
         if command in self.command_descriptions:
@@ -40,7 +48,7 @@ class Help():
             
             if not parameters:
                 commands = []
-                for command, command_auth_level in bot.helpers.get_auth_commands(bot).items():
+                for command, command_auth_level in self.list_auth_commands(bot).items():
                     if command_auth_level <= auth_level:
                         commands.append(command)
                 
@@ -66,7 +74,7 @@ class Help():
                 if parameters in command_aliases:
                     parameters = command_aliases[parameters]
                 
-                commands = bot.helpers.get_auth_commands(bot)
+                commands = self.list_auth_commands(bot)
                 if parameters in commands and commands[parameters] > auth_level:
                     return False
                 
