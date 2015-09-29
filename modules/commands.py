@@ -48,7 +48,7 @@ class Commands():
         
         command = command.strip().lower()
         
-        command_aliases = bot.helpers.get_command_aliases(bot)
+        command_aliases = {k.strip().lower(): v.strip().lower() for k, v in (v.split('=', 1) for v in bot.db.get_all('command_alias', '%=%'))}
         if command in command_aliases:
             command = command_aliases[command]
         

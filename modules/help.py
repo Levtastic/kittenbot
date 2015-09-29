@@ -62,7 +62,7 @@ class Help():
                 parameters = parameters.strip()
                 handled = False
                 
-                command_aliases = bot.helpers.get_command_aliases(bot)
+                command_aliases = {k.strip().lower(): v.strip().lower() for k, v in (v.split('=', 1) for v in bot.db.get_all('command_alias', '%=%'))}
                 if parameters in command_aliases:
                     parameters = command_aliases[parameters]
                 
@@ -70,7 +70,7 @@ class Help():
                 if parameters in commands and commands[parameters] > auth_level:
                     return False
                 
-                aliases = [a for a, c in bot.helpers.get_command_aliases(bot).items() if c == parameters]
+                aliases = [a for a, c in command_aliases.items() if c == parameters]
                 if aliases:
                     bot.send(connection, reply_target, 'Command aliases: ' + ', '.join([parameters] + aliases), event, False)
                     handled = True
