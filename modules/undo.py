@@ -61,6 +61,9 @@ class Undo():
             return False # not for us
         
         if command == 'undo':
+            if not undo_stack:
+                return False
+            
             undo = self.undo_stack.pop()
             if undo:
                 undo['function'](*undo['parameters'])
@@ -72,6 +75,9 @@ class Undo():
                 return True
         
         elif command == 'redo':
+            if not redo_stack:
+                return False
+            
             redo = self.redo_stack.pop()
             if redo:
                 redo['function'](*redo['parameters'])
