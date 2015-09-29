@@ -46,8 +46,14 @@ class Help():
                 
                 if commands:
                     commands.sort()
-                    for line in bot.helpers.list_split(commands, 10):
-                        bot.send(connection, reply_target, '-' + ', '.join(str(key) for key in line), event)
+                    for i in range(0, len(commands), 10):
+                        bot.send(
+                            connection,
+                            reply_target,
+                            ', '.join(str(key) for key in commands[i:i+10]),
+                            event,
+                            False
+                        )
                     
                     bot.send(connection, reply_target, 'Use "help [command]" for more information on a specific command', event)
                     return True

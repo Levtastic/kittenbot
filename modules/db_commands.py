@@ -158,8 +158,14 @@ class DbCommands():
                 results = bot.db.list_keys(auth_level < 70)
             
             if results:
-                for line in bot.helpers.list_split(results, 6):
-                    bot.send(connection, reply_target, ', '.join(str(key) for key in line), event, False)
+                for i in range(0, len(results), 6):
+                    bot.send(
+                        connection,
+                        reply_target,
+                        ', '.join(str(key) for key in results[i:i+6]),
+                        event,
+                        False
+                    )
                 
                 return True
         

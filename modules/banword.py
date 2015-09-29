@@ -80,8 +80,14 @@ class BanWord():
                 if not words:
                     return False
                 
-                for line in bot.helpers.list_split(words, 10):
-                    bot.send(connection, reply_target, ', '.join(line), event, False)
+                for i in range(0, len(words), 10):
+                    bot.send(
+                        connection,
+                        reply_target,
+                        ', '.join(words[i:i+10]),
+                        event,
+                        False
+                    )
                 
                 return True
             
@@ -124,8 +130,14 @@ class BanWord():
                 if not words:
                     return False
                 
-                for line in bot.helpers.list_split(words, 10):
-                    bot.send(connection, reply_target, ', '.join(line), event, False)
+                for i in range(0, len(words), 10):
+                    bot.send(
+                        connection,
+                        reply_target,
+                        ', '.join(words[i:i+10]),
+                        event,
+                        False
+                    )
                 
                 return True
             
@@ -149,8 +161,14 @@ class BanWord():
                 if not words:
                     return False
                 
-                for line in bot.helpers.list_split(words, 10):
-                    bot.send(connection, reply_target, ', '.join(line), event, False)
+                for i in range(0, len(words), 10):
+                    bot.send(
+                        connection,
+                        reply_target,
+                        ', '.join(words[i:i+10]),
+                        event,
+                        False
+                    )
                 
                 return True
             
