@@ -61,6 +61,7 @@ class S3Backup():
                 },
             )
             
+            bot.send(connection, reply_target, bot.db.get_random('yes'), event)
             return True
         
         return False
