@@ -62,3 +62,5 @@ class S3Backup():
             )
             
             return True
+        
+        return False
