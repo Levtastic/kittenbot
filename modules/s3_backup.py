@@ -42,6 +42,7 @@ class S3Backup():
         
         if command == 'backup':
             creds = bot.db.get('s3_credentials')
+            # <access key>|<secret key>|<bucket name>|<uploaded file name>
             akey, skey, bname, uname = creds.split('|')
             
             session = boto3.session.Session(
