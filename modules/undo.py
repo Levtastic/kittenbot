@@ -61,7 +61,7 @@ class Undo():
             return False # not for us
         
         if command == 'undo':
-            if not undo_stack:
+            if not self.undo_stack:
                 return False
             
             undo = self.undo_stack.pop()
@@ -75,7 +75,7 @@ class Undo():
                 return True
         
         elif command == 'redo':
-            if not redo_stack:
+            if not self.redo_stack:
                 return False
             
             redo = self.redo_stack.pop()
