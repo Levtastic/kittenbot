@@ -46,7 +46,7 @@ class MessageMuter():
             # or maybe they don't want the bot to PM them, or something
             channel = event.source.nick
         
-        if command == 'mute' and bot.db.add('muted_targets|' + bot.server_name, channel):
+        if command == 'mute' and bot.db.add('muted_targets|' + bot.server_name, channel.lower()):
             self.last_mute = channel
             bot.send(connection, reply_target, bot.db.get_random('yes'), event)
             return True
