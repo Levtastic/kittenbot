@@ -1,4 +1,4 @@
-import random
+import random, re
 
 def init():
     Choose()
@@ -19,6 +19,9 @@ class Choose():
         
         event_handler.hook('commands:get_auth_commands', self.get_auth_commands)
         event_handler.hook('commands:do_auth_command', self.do_auth_command)
+        
+        self.me_replace = re.compile(r'\bme', re.IGNORECASE)
+        self.my_replace = re.compile(r'\bmy', re.IGNORECASE)
     
     def get_command_description(self, bot, command):
         if command in self.command_descriptions:
@@ -32,7 +35,8 @@ class Choose():
             return False # not for us
         
         if command == 'choose':
-            parameters = parameters.replace('my', 'your').replace('me', 'you')
+            parameters = self.my_replace.sub('your', parameters)
+            parameters = self.me_replace.sub('you', parameters)
             options = {self.process_option(s) for s in parameters.split(' or ')}
             options = [option for option in options if option]
             
