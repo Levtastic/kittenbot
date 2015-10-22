@@ -9,6 +9,7 @@ class BotCommands():
         'die': 80,
         'reload': 80,
         'exec': 90,
+        'eval': 90,
     }
     command_descriptions = {
         'nick': """
@@ -27,8 +28,14 @@ class BotCommands():
             Syntax: reload
         """,
         'exec': """
-            Runs arbitrary python code. Obviously, be careful with this.
+            Runs arbitrary python code.
+            Obviously, be careful with this.
             Syntax: exec -force [executable python code]
+        """,
+        'eval': """
+            Runs arbitrary python code and says any result.
+            Obviously, be careful with this.
+            Syntax: eval -force [executable python code]
         """,
     }
     
@@ -85,6 +92,21 @@ class BotCommands():
                         bot.send(connection, reply_target, '%s: %s' % (type(e).__name__, str(e)), event, False)
                     else:
                         bot.send(connection, reply_target, bot.db.get_random('yes'), event)
+                    
+                    return True
+        
+        elif command == 'eval': # ResponseBot: eval force bot.channels
+            try:
+                force, command = [s.strip() for s in parameters.strip().split(' ', 1)]
+            except ValueError:
+                return False
+            else:
+                force = force.replace('-', '').replace('/', '').replace('\\', '')
+                if force in ('force', 'f'):
+                    try:
+                        bot.send(connection, reply_target, repr(eval(command)), event)
+                    except BaseException as e:
+                        bot.send(connection, reply_target, '%s: %s' % (type(e).__name__, str(e)), event, False)
                     
                     return True
         
