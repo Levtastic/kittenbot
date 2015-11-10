@@ -94,12 +94,12 @@ class Tell():
             days and time_pieces.append(self.format_time_piece('day', days))
             hours and time_pieces.append(self.format_time_piece('hour', hours))
             minutes and time_pieces.append(self.format_time_piece('minute', minutes))
-            time_pieces.append(self.format_time_piece('second', seconds))
+            seconds and time_pieces.append(self.format_time_piece('second', seconds))
             
             message = '%s: message from %s %s: %s' % (
                 event.source.nick,
                 stored_message.source.nick,
-                time_pieces and ', '.join(time_pieces[:2]) + ' ago' or 'just now',
+                (', '.join(time_pieces[:2]) + ' ago') if time_pieces else 'just now',
                 stored_message.message,
             )
             
