@@ -88,7 +88,7 @@ class BotCommands():
                         bot.send(connection, reply_target, '%s: %s' % (type(e).__name__, str(e)), event, False)
                     else:
                         if self.exec_result is not None:
-                            bot.send(connection, reply_target, self.exec_result, event)
+                            bot.send(connection, reply_target, str(self.exec_result), event)
                         else:
                             bot.send(connection, reply_target, bot.db.get_random('yes'), event)
                     
