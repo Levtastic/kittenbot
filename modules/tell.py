@@ -94,12 +94,12 @@ class Tell():
             days and time_pieces.append(self.format_time_piece('day', days))
             hours and time_pieces.append(self.format_time_piece('hour', hours))
             minutes and time_pieces.append(self.format_time_piece('minute', minutes))
-            seconds and time_pieces.append(self.format_time_piece('second', seconds))
+            time_pieces.append(self.format_time_piece('second', seconds))
             
             message = '%s: message from %s %s: %s' % (
                 event.source.nick,
                 stored_message.source.nick,
-                time_pieces and ', '.join(time_pieces) + ' ago' or 'just now',
+                time_pieces and ', '.join(time_pieces[:2]) + ' ago' or 'just now',
                 stored_message.message,
             )
             
@@ -110,7 +110,7 @@ class Tell():
         return False
     
     def format_time_piece(self, name, value):
-        return '%d %s%s' % (value, name, value > 1 and 's' or '')
+        return '%d %s%s' % (value, name, '' if value == 1 else 's')
 
 class StoredMessage():
     def __init__(self, destination, source, message):
