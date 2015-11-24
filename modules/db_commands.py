@@ -126,7 +126,7 @@ class DbCommands():
             
             param_split = parameters.strip().split(' ', 1)
             if param_split[0].isdigit():
-                page = int(parameters[0])
+                page = int(param_split[0])
                 parameters = param_split[1]
             
             try:
