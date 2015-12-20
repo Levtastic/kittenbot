@@ -2,6 +2,8 @@ import sys
 import logging
 import datetime
 import sqlite3
+
+import os.path
  
 from contextlib import closing
 from irc.bot import ServerSpec
@@ -51,6 +53,9 @@ def main():
     ).start()
 
 def get_connection_details(server_name):
+    if not os.path.isfile(db_name):
+        raise FileNotFoundError('Cannot connect without a server address before database exists')
+
     with closing(sqlite3.connect(db_name)) as database:
         with closing(database.cursor()) as cursor:
             cursor.execute("""
@@ -72,7 +77,7 @@ def get_connection_details(server_name):
     if result:
         return result[0]
     else:
-        return ''
+        raise KeyError('Unable to find server %s in the database' % server_name)
 
 def die(message = ''):
     if message:
