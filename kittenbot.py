@@ -17,11 +17,7 @@ def main():
         if server_name.lower().replace('-', '') in ('h', 'help'):
             die("Usage: kittenbot.py [<server[:port]>] <server name>")
         
-        connection = get_connection_details(server_name)
-        if not connection:
-            die('Server name "%s" not found in the database' % server_name)
-        
-        s = connection.split("|", 2)
+        s = get_connection_details(server_name).split("|", 2)
         server = ServerSpec(s[0], int(s[1]), s[2])
         
     elif len(sys.argv) == 3:
@@ -54,7 +50,7 @@ def main():
 
 def get_connection_details(server_name):
     if not os.path.isfile(db_name):
-        raise FileNotFoundError('Cannot connect without a server address before database exists')
+        die('Cannot connect without a server address before database exists')
 
     with closing(sqlite3.connect(db_name)) as database:
         with closing(database.cursor()) as cursor:
@@ -77,7 +73,7 @@ def get_connection_details(server_name):
     if result:
         return result[0]
     else:
-        raise KeyError('Unable to find server %s in the database' % server_name)
+        die('Server name "%s" not found in the database' % server_name)
 
 def die(message = ''):
     if message:
