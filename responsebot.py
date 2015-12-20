@@ -43,15 +43,7 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
         return ' | '.join(version_info)
     
     def send(self, connection, target, message, *args, **kwargs):
-        try:
-            # default behaviour, if nothing has overridden it
-            connection.privmsg(target, message)
-        except BaseException as e:
-            error = 'unable to send "%s" to %s: %s: %s' % (message, target, type(e).__name__, e)
-            logging.exception(error)
-            print(error)
-            return False
-        
+        connection.privmsg(target, message)
         return True
     
     def quit(self, connection, event, message = ''):
