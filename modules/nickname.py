@@ -14,7 +14,7 @@ class Nickname():
     
     def on_welcome(self, bot, connection, event):
         nicklist = self.names()
-        if connection.get_nickname() in nicklist and connection.get_nickname() != nicklist[0]:
+        if len(nicklist) > 1 and connection.get_nickname() != nicklist[0]:
             connection.nick(nicklist[0])
     
     def on_nick(self, bot, connection, event):
@@ -44,8 +44,6 @@ class Nickname():
         new_nick = nicklist[new_nick_position]
         if new_nick == connection.get_nickname():
             bot.execute_delayed(connection, self.nick_delay, self.get_ideal_nick, (bot, connection))
-        else:
-            connection.nick(new_nick)
     
     def on_nonicknamegiven(self, bot, connection, events):
         self.get_ideal_nick(bot, connection)
