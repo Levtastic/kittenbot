@@ -1,5 +1,6 @@
 import logging
 import irc.bot
+import irc.client
 
 from modulehandler import ModuleHandler
 
@@ -43,18 +44,19 @@ class ResponseBot(irc.bot.SingleServerIRCBot):
         return ' | '.join(version_info)
     
     def send(self, connection, target, message, *args, **kwargs):
-        connection.privmsg(target, message)
-        return True
+        try:
+            connection.privmsg(target, message)
+            return True
+        except (irc.client.IRCError, irc.client.InvalidCharacters, irc.client.MessageTooLong):
+            error = 'Unable to send message "%s" to %s: %s: %s' % (message, target, type(e).__name__, e)
+            logging.exception(error)
+            print(error)
+            return False
     
     def quit(self, connection, event, message = ''):
         for process_function in self.module_handler.get_event_handlers('bot:on_quit'):
-            try:
-                if process_function(self, connection, event, message) is False:
-                    return False
-            except BaseException as e:
-                error = 'error in message processing function: %s: %s' % (type(e).__name__, e)
-                logging.exception(error)
-                print(error)
+            if process_function(self, connection, event, message) is False:
+                return False
         
         # die later, after any final issues have been handled
         self.execute_delayed(connection, 1, self.die, (message, ))

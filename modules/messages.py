@@ -39,14 +39,8 @@ def on_message(bot, connection, event, auth_level = None):
         return False
     
     for handler in event_handler.get_handlers('messages:on_handle_messages'):
-        try:
-            if handler(bot, connection, event, message, is_public, is_action, reply_target, auth_level) is True:
-                return
-        
-        except BaseException as e:
-            error = 'error in message handling function: %s: %s' % (type(e).__name__, e)
-            logging.exception(error)
-            print(error)
+        if handler(bot, connection, event, message, is_public, is_action, reply_target, auth_level) is True:
+            return
     
     # if we get here, no handler wanted the message, so we're done - bot does nothing
 

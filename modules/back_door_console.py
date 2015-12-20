@@ -63,15 +63,9 @@ class BackDoorConsole():
             handled = False
             
             for process_function in event_handler.get_handlers('console:on_input'):
-                try:
-                    if process_function(bot, connection, event, command) is True:
-                        handled = True
-                        break
-                
-                except BaseException as e:
-                    error = 'error in console processing function: %s: %s' % (type(e).__name__, e)
-                    logging.exception(error)
-                    print(error)
+                if process_function(bot, connection, event, command) is True:
+                    handled = True
+                    break
             
             if not handled:
                 try:
